@@ -13,13 +13,13 @@ public class Main {
       // create a basic JFrame
       JFrame.setDefaultLookAndFeelDecorated(true);
       JFrame frame = new JFrame("JFrame Color Example");
-//    frame.setSize(670,710);
+
       frame.setSize(new Dimension(500, 500));
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
       Container contentPane = frame.getContentPane();
 
-      LGenerator lg = new LGenerator();
+      LGenerator lg = new LGenerator(0);
 
       char[][] map = lg.generateLevel(10);
 
@@ -27,7 +27,7 @@ public class Main {
 
       lg.dump();
       
-      WorldPanel worldPanel = new WorldPanel(map.length, map[0].length);
+      WorldPanel worldPanel = new WorldPanel(map);
 
       worldPanel.setPreferredSize(new Dimension(800, 800));
 

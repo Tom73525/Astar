@@ -27,6 +27,7 @@ public class World
    public static final byte START_REAL_TILE = 1;
    public static final char WALL_TILE = '#';
    public static final char GATEWAY_TILE = '$';
+   public static final char PLAYER_START_TILE = 'X';
    public static final byte END_REAL_TILE = 2;
    // activator tiles "become" an actor when the player gets in range
    // they're used so we don't have to bother with cycling actors in the

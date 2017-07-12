@@ -5,6 +5,7 @@
  */
 package astar.interactive;
 
+import astar.aes.World;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -18,8 +19,8 @@ import javax.swing.JPanel;
  * @author roncoleman
  */
 public class WorldPanel extends JPanel implements MouseListener, MouseMotionListener {
-    public final int SIZE = 10;
-    public final int INSET = 3;
+    public final int STEP_SIZE = 10;
+    public final int STEP_INSET = 3;
     private final int rowCount;
     private final int colCount;
     
@@ -33,6 +34,16 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
     private int lastBaseY;
     private int touchX;
     private int touchY;
+    private char[][] map;
+    
+    public WorldPanel(char[][] map) {
+        this.map = map;
+        
+        this.rowCount = map.length;
+        this.colCount = map[0].length;
+        
+        init();
+    }
     
     public WorldPanel(int rowCount, int colCount) {
         super();
@@ -57,16 +68,30 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
         
         for(int row=0; row < rowCount; row++) {
             for(int col=0; col < colCount; col++) {
-                if(row == rowCount-1 && col == colCount-1)
-                    g.setColor(Color.RED);
-                
-                else if(row != 0 || col != 0)
-                    g.setColor(Color.WHITE);
+                char tile = map[row][col];
+                switch(tile) {
+                    case World.PLAYER_START_TILE:
+                        g.setColor(Color.GREEN);
+                        break;
+                        
+                    case World.WALL_TILE:
+                        g.setColor(Color.BLACK);
+                        break;
+                        
+                    case World.GATEWAY_TILE:
+                        g.setColor(Color.RED);
+                        break;
+                        
+                    case World.NO_TILE:
+                    default:
+                        g.setColor(Color.WHITE);
+                }
                     
-                int x = col * (SIZE + INSET) + INSET + baseX;
-                int y = row * (SIZE + INSET) + INSET + baseY;
+                int x = col * (STEP_SIZE + STEP_INSET) + STEP_INSET + baseX;
                 
-                g.fillRect(x, y, SIZE, SIZE);
+                int y = row * (STEP_SIZE + STEP_INSET) + STEP_INSET + baseY;
+                
+                g.fillRect(x, y, STEP_SIZE, STEP_SIZE);
             }
             
         }

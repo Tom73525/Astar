@@ -138,6 +138,7 @@ public class LGenerator
       // Set the location where the player's ship will start from.
       playerStartX = roomX[0] + (roomW[0] / 2);
       playerStartY = roomY[0] + (roomH[0] / 2);
+      tileMap[playerStartY][playerStartX] = World.PLAYER_START_TILE;
 
       // The addRoom method will fill a room with other objects (such as enemy
       // fighter). This code clears anything that was added to near the player's
@@ -312,6 +313,8 @@ public class LGenerator
       // was the corridor to it)
       setEndPoint(roomX[roomCount - 2] + roomW[roomCount - 2] / 2,
                   roomY[roomCount - 2] + roomH[roomCount - 2] / 2);
+      
+      tileMap[playerStartY][playerStartX] = World.PLAYER_START_TILE;
 
       //#ifdef debug
       //dump();
@@ -504,8 +507,9 @@ public class LGenerator
                System.out.print("T");
             else if (tileMap[ty][tx] == World.FIGHTER_ACTIVATOR_TILE)
                System.out.print("F");
-            else if (playerStartX == tx && playerStartY == ty)
+            else if (playerStartX == tx && playerStartY == ty) {
                System.out.print("X");
+            }
             else
                System.out.print(" ");
          }
