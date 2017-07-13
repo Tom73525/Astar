@@ -1,7 +1,7 @@
 package astar;
 
 import astar.aes.World;
-import astar.pcg.SimpleLevelGenerator;
+import astar.pcg.BasicLevelGenerator;
 import astar.util.Node;
 import java.io.*;
 import java.util.*;
@@ -25,55 +25,49 @@ public class Astar {
     }
     
     public final double SQRT_2 = Math.sqrt(2);
-    
-    private static Geometry geometry = Geometry.EUCLIDEAN;
+    public final static char SYM_DEST = 'D';
+    public final static char SYM_SRC = 'S';
+    public final static char SYM_OBSTACLE = '#';
+    public final static char SYM_BUG = '?';
+    public final static char SYM_FREE = '.';    
 
     public final static boolean PRIORITY_STRAIGHT = false;
-	
-    /** Destination symbol */
-    public final static char SYM_DEST = 'D';
-
-    /** Source symbol */
-    public final static char SYM_SRC = 'S';
-
-    /** Obstacle symbol */
-    public final static char SYM_OBSTACLE = '#';
-    
-    public final static char SYM_BUG = '?';
-
-    /** Free (open) symbol */
-    public final static char SYM_FREE = '.';
-    
     public final static int NO_LIMIT = 10000;
-
-    private BufferedReader reader;
-    private int width;
-    private int height;
-    private char[][] tileMap;
-    private int destX = -1;
-    private int destY = -1;
-    private int srcX = -1;
-    private int srcY = -1;
-    private LinkedList openList = new LinkedList();
-    private LinkedList closedList = new LinkedList();    
-    private Node dest;
-    private Node src;
     
-
+    protected static Geometry geometry = Geometry.EUCLIDEAN;
+    
+    protected BufferedReader reader;
+    protected int width;
+    protected int height;
+    protected char[][] tileMap;
+    protected int destX = -1;
+    protected int destY = -1;
+    protected int srcX = -1;
+    protected int srcY = -1;
+    protected LinkedList openList = new LinkedList();
+    protected LinkedList closedList = new LinkedList();    
+    protected Node dest;
+    protected Node src;
+    
     // Offsets relative to current position in map
-    private int[][] xyOffsets = {
-        {-1,0},      // W
-        {-1,-1},     // NW
-        {0,-1},      // N
-        {1,-1},      // NE
-        {1,0},       // E
-        {1,1},       // SE
-        {0,1},       // S
-        {-1,1} };    // SW
+    protected int[][] xyOffsets = {
+        {-1, 0},  // W
+        {-1, -1}, // NW
+        {0, -1},  // N
+        {1, -1},  // NE
+        {1, 0},   // E
+        {1, 1},   // SE
+        {0, 1},   // S
+        {-1, 1}   // SW
+    };
 
     // Next offset index
-    private int indOffset;
-
+    protected int indOffset;
+    
+    public Astar() {
+        
+    }
+    
     /**
      * Constructor.
      * @param name File name.
@@ -87,35 +81,6 @@ public class Astar {
         }
     }
 
-    public Astar(char[][] tileMap) {
-        this.tileMap = tileMap;
-        this.width = tileMap[0].length;
-        this.height = tileMap.length;
-        
-        for(int row=0; row < tileMap.length; row++) {
-            for(int col=0; col < tileMap[0].length; col++) {
-                char tile = tileMap[row][col];
-                
-                switch(tile) {
-                    case World.PLAYER_START_TILE:
-                        this.srcX = col;
-                        this.srcY = row;
-                        break;
-                        
-                    case World.GATEWAY_TILE:
-                        this.destX = col;
-                        this.destY = row;
-                        break;
-                }
-                
-                if(srcX >=0 && srcY >= 0 && destX >=0 && destY >= 0)
-                    break;
-            }
-        }
-        
-        if(srcX < 0 || srcY < 0 || destX < 0 || destY < 0)
-            System.err.println("bad tile map");
-    }
     
     /**
      * Constructor.
@@ -149,52 +114,6 @@ public class Astar {
     
     public void begin() {
         dest = src = null;
-    }
-    
-    public Node find1() {
-        if(src == null && dest == null) {
-            dest = new Node(destX, destY);
-            src = new Node(srcX, srcY);
-
-            moveToOpen(src);
-        }
-
-        while (!openList.isEmpty()) {
-            Node curNode = getLowestCostNode();
-
-            if (curNode.equals(dest)) {
-                return relink(curNode);
-            }
-
-            moveToClosed(curNode);
-
-            // Reset the adjacency state
-            reset();
-
-            // Put all the adjacent nodes on the open list of possibilities
-            do {
-                // Get next adjacent to current node
-                Node adj = getAdjacent(curNode);
-
-                // If there are no more adjacents, we're here
-                if (adj == null) {
-                    break;
-                }
-
-                double heuristic = calculateHeuristic(adj, dest);
-                double steps = adj.getSteps();
-                double cost = steps + heuristic;
-
-                adj.setCost(cost);
-
-                openList.add(adj);
-
-            } while (true);
-            
-            return curNode;
-        }
-        
-        return null;
     }
     
     /**
@@ -582,7 +501,7 @@ public class Astar {
       
       for(int j=0; j < 1000; j++) {
         
-        SimpleLevelGenerator lg = new SimpleLevelGenerator(25,25,101L+j);
+        BasicLevelGenerator lg = new BasicLevelGenerator(101);
         
         lg.layoutSrcDest();
         

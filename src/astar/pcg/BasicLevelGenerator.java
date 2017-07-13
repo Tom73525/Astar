@@ -1,12 +1,13 @@
 package astar.pcg;
 
 import astar.Astar;
+import astar.aes.World;
 import java.util.Random;
 /**
  *
- * @author Ron
+ * @author RonColeman
  */
-public class SimpleLevelGenerator {
+public class BasicLevelGenerator extends AbstractLevelGenerator {
   public final static int BUFZONE = 4;
   //public final static int BARRIER_FACTOR = 5;
   public final static int BARRIER_FACTOR = 2;
@@ -19,24 +20,33 @@ public class SimpleLevelGenerator {
   protected int destY;
   protected Random ran = new Random();
    
-  /** Creates a new instance of LevelGenerator */
-  public SimpleLevelGenerator(int width, int height,long seed) {
-    this.width = width;
-    this.height = height;
+  /** Creates a new instance of LevelGenerator
+     * @param seed
+   */
+  public BasicLevelGenerator(Integer seed) {
+    super(seed);
+  }
+  
+  @Override
+  public char[][] generateLevel(int level) {
+    this.width = level * 5;
+    this.height = level * 5;
       
     tileMap = new char[height][width];
         
     for(int i=0; i < height; i++) {
       for(int j=0; j < width; j++) {
-        tileMap[i][j] = Astar.SYM_FREE;
+        tileMap[i][j] = World.NO_TILE;
       }
     }
     
     ran.setSeed(seed);
     
-    //layoutSrcDest();
+    layoutSrcDest();
    
-    //layoutBarriers();
+    layoutBarriers();
+      
+    return tileMap;
   }
   
   public char[][] getMap() {
@@ -59,7 +69,8 @@ public class SimpleLevelGenerator {
     return destY;
   }
   
-  public void print() {
+  @Override
+  public void dump() {
     for(int j=0; j < height; j++) {
       for(int k=0; k < width; k++)
         System.out.print(tileMap[k][j]);
@@ -79,8 +90,8 @@ public class SimpleLevelGenerator {
     } while(Math.abs(destX - srcX) <= BUFZONE || Math.abs(destY - srcY) <= BUFZONE ||
             destX - BUFZONE <= 0 || width - destX <= BUFZONE || destY - BUFZONE <= 0 || height - destY <= BUFZONE);
       
-    tileMap[srcY][srcX] = Astar.SYM_SRC;
-    tileMap[destY][destX] = Astar.SYM_DEST;     
+    tileMap[srcY][srcX] = World.PLAYER_START_TILE;
+    tileMap[destY][destX] = World.GATEWAY_TILE;     
   }
     
   public void layoutBarriers() {
@@ -116,7 +127,7 @@ public class SimpleLevelGenerator {
       if(x == destX && y == destY)
         continue;
       
-      tileMap[y][x] = Astar.SYM_OBSTACLE;
+      tileMap[y][x] = World.WALL_TILE;
     }
   }      
 }

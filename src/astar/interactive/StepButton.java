@@ -5,7 +5,6 @@
  */
 package astar.interactive;
 
-import astar.Astar;
 import astar.util.Node;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,7 +20,7 @@ import javax.swing.JOptionPane;
 public final class StepButton extends JButton implements ActionListener {
 
     private final WorldPanel worldPanel;
-    private final Astar astar;
+    private final SingleStepAstar astar;
     private final JCheckBox runEndCheckBox;
     private int tries = 0;
     private final AstarFrame frame;
@@ -63,8 +62,7 @@ public final class StepButton extends JButton implements ActionListener {
                         return;
                     }
                      
-                    if(head.equals(dest)) {
-                        
+                    if(head == null || head.equals(dest)) {
                         String msg = "Tries: " + tries; 
                         msg += "\nElapsed time: " + 0;
                         

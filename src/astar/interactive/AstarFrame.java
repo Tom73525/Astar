@@ -1,93 +1,149 @@
 package astar.interactive;
 
-import astar.Astar;
-import astar.pcg.WellsLevelGenerator;
+import astar.pcg.AbstractLevelGenerator;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
- 
+
 public class AstarFrame extends JFrame {
 
-  WorldPanel worldPanel;
- 
-  public static void main(String[] arguments) {
-      AstarFrame mainFrame = new AstarFrame();
-      
-      mainFrame.setVisible(true);
-      
+    WorldPanel worldPanel;
+
+    public static void main(String[] arguments) {
+        AstarFrame mainFrame = new AstarFrame();
+
+        mainFrame.setVisible(true);
+
     }
-    protected Astar astar;
+
+    protected SingleStepAstar astar;
     protected JTextField stepSizeField;
     protected JCheckBox runEndCheckBox;
-  
-  public AstarFrame() {
-      init();
-  }
-  
-  protected void init() {
-      // create a basic JFrame
-      setDefaultLookAndFeelDecorated(true);
-//      JFrame frame = new JFrame("JFrame Color Example");
+    protected int seed = 0;
+    protected int level = 10;
+    protected char[][] tileMap;
+    private AbstractLevelGenerator levelGenerator;
+    private boolean debug = false;
 
-      setSize(new Dimension(500, 500));
-      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    public AstarFrame() {
+        init();
+    }
 
-      Container contentPane = getContentPane();
+    protected final void init() {
+        initConfig();
+        
+        initWorld();
+        
+        initFrame();
+    }
 
-      WellsLevelGenerator lg = new WellsLevelGenerator(0);
+    /**
+     * Initializes the configuration.
+     */
+    protected void initConfig() {
+        String debugs = System.getProperty("astar.debug");
+        if(debugs != null && debugs.equals("true"))
+            debug = true;
+            
+        String seeds = System.getProperty("astar.seed");
+        if (seeds != null) {
+            seed = Integer.parseInt(seeds);
+        }
 
-      char[][] map = lg.generateLevel(10);
+        String levels = System.getProperty("astar.level");
+        if (levels != null) {
+            level = Integer.parseInt(levels);
+        }
 
-      System.out.println(map.length + " x " + map[0].length);
+        String className = System.getProperty("astar.lg");
+        
+        if (className == null)
+            className = "astar.pcg.WellsLevelGenerator";
 
-      lg.dump();
-      
-      astar = new Astar(map);
-      
-      // Configure the world panel where
-      worldPanel = new WorldPanel(map);
+        try {
+            Class<?> cl = Class.forName(className);
 
-      worldPanel.setPreferredSize(new Dimension(800, 800));
+            Constructor<?> cons = cl.getConstructor(Integer.class);
 
-      JScrollPane scroller = new JScrollPane(worldPanel);
+            this.levelGenerator = (AbstractLevelGenerator) cons.newInstance(seed);
 
-      scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-      scroller.getVerticalScrollBar().setUnitIncrement(10);
-      scroller.getHorizontalScrollBar().setUnitIncrement(10);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
 
-      contentPane.add(BorderLayout.CENTER, scroller);
+        } catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+            Logger.getLogger(AstarFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    protected void initWorld() {
+        tileMap = levelGenerator.generateLevel(level); 
+        
+        System.out.println(tileMap.length + " x " + tileMap[0].length);
+        
+        if(debug)
+            levelGenerator.dump();
+        
+        astar = new SingleStepAstar(tileMap);
+    }
+    
+    protected void initFrame() {
+        setDefaultLookAndFeelDecorated(true);
 
-      // Configure the button panel
-      JPanel buttonPanel = new JPanel();
-      
-      buttonPanel.setLayout(new BorderLayout());
-      
-      buttonPanel.add(BorderLayout.EAST, new QuitButton());
-      
-      JPanel stepPanel = new JPanel(new BorderLayout());
-      
-      runEndCheckBox = new JCheckBox("To end");
-      
-      runEndCheckBox.setSelected(false);
-  
-      stepPanel.add(BorderLayout.CENTER,runEndCheckBox);
-      
-      stepPanel.add(BorderLayout.WEST, new StepButton(this));
-      
-      buttonPanel.add(BorderLayout.WEST,stepPanel);
+        setSize(new Dimension(500, 500));
 
-      contentPane.add(BorderLayout.SOUTH, buttonPanel);
-      
-      contentPane.setPreferredSize(new Dimension(500, 500));
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-      setLocationRelativeTo(null);
+        Container contentPane = getContentPane();
 
-//      setVisible(true);
+        // Configure the world panel where
+        worldPanel = new WorldPanel(tileMap);
 
-  }
+        worldPanel.setPreferredSize(new Dimension(800, 800));
+
+        JScrollPane scroller = new JScrollPane(worldPanel);
+
+        scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scroller.getVerticalScrollBar().setUnitIncrement(10);
+        scroller.getHorizontalScrollBar().setUnitIncrement(10);
+
+        contentPane.add(BorderLayout.CENTER, scroller);
+
+        // Configure the control panel
+        JPanel controlPanel = new JPanel();
+
+        controlPanel.setLayout(new BorderLayout());
+
+        controlPanel.add(BorderLayout.EAST, new QuitButton());
+
+        // Create the step control subpanel
+        JPanel stepPanel = new JPanel(new BorderLayout());
+
+        // Add the checkbox that allows automated steps
+        runEndCheckBox = new JCheckBox("To end");
+
+        runEndCheckBox.setSelected(false);
+
+        stepPanel.add(BorderLayout.CENTER, runEndCheckBox);
+
+        // Add manual single-step button
+        stepPanel.add(BorderLayout.WEST, new StepButton(this));
+
+        controlPanel.add(BorderLayout.WEST, stepPanel);
+
+        contentPane.add(BorderLayout.SOUTH, controlPanel);
+
+        contentPane.setPreferredSize(new Dimension(500, 500));
+
+        setLocationRelativeTo(null);
+
+//      setVisible(true);        
+    }
 }

@@ -8,7 +8,7 @@ import astar.aes.World;
  * @author Martin Wells
  */
 
-public class WellsLevelGenerator
+public class WellsLevelGenerator extends AbstractLevelGenerator
 {
    private static final int LEFT_DIR = 0;
    private static final int RIGHT_DIR = 1;
@@ -29,14 +29,15 @@ public class WellsLevelGenerator
 
    public WellsLevelGenerator()
    {
+       super(0);
    }
    
    /**
     * Constructs a level with a given random seed.
     * @param seed Seed
     */
-   public WellsLevelGenerator(int seed) {
-       Tools.setRandomizer(seed);
+   public WellsLevelGenerator(Integer seed) {
+       super(seed);
    }
 
    private void clear()
@@ -76,8 +77,11 @@ public class WellsLevelGenerator
     * @return A new byte array containing the tiles for the newly generated
     * level.
     */
-   public char[][] generateLevel(int level)
-   {
+   @Override
+   public char[][] generateLevel(int level)   {
+              
+       Tools.setRandomizer(seed);
+       
       // Set the size of the level relative to the level number provided.
       width = 30 + (level * 2);
       height = 30 + (level * 2);
