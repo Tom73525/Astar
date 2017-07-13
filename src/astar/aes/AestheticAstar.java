@@ -165,8 +165,8 @@ public class  AestheticAstar {
 		
 		while(anode != null) {
 			len++;
-			int x = anode.getX();
-			int y = anode.getY();
+			int x = anode.getCol();
+			int y = anode.getRow();
 			
 			tileMap[y][x] = AestheticAstar.SYM_FULL_PATH;
 			
@@ -225,8 +225,8 @@ public class  AestheticAstar {
 
 		Vector<Double> data = new Vector<Double>();
 			
-		int goalx = anode.getX();
-		int goaly = anode.getY();
+		int goalx = anode.getCol();
+		int goaly = anode.getRow();
 		
 		// (25,25) -- uncomment
 //		int goalx = 25;
@@ -239,8 +239,8 @@ public class  AestheticAstar {
 			// To skip start node, uncomment
 //			if(anode.getParent() == null)
 //				break;
-			double x = anode.getX();
-			double y = anode.getY();
+			double x = anode.getCol();
+			double y = anode.getRow();
 			
 //			System.out.println("("+x+" "+y+")");
 			
@@ -411,8 +411,8 @@ public class  AestheticAstar {
 		int miny = Integer.MAX_VALUE;
 
 		while (anode != null) {
-			xs[index] = anode.getX();
-			ys[index] = anode.getY();
+			xs[index] = anode.getCol();
+			ys[index] = anode.getRow();
 			
 //			System.out.println(xs[index]+" "+ys[index]);
 			if (xs[index] < minx)
@@ -540,7 +540,7 @@ public class  AestheticAstar {
 
 		while (anode != null) {
 			
-			System.out.print(index+" "+anode.getX()+" "+anode.getY());
+			System.out.print(index+" "+anode.getCol()+" "+anode.getRow());
 			
 			if (this.hugsWall(anode) || this.hugsWallCorner(anode)) {
 				System.out.println(" hugs");
@@ -560,8 +560,8 @@ public class  AestheticAstar {
 	 * @param anode The goal node
 	 */
 	protected void eliminateTracking(Node anode) {
-		int x = anode.getX();
-		int y = anode.getY();
+		int x = anode.getCol();
+		int y = anode.getRow();
 		
 		Node node1 = null, node2 = null;
 		
@@ -632,8 +632,8 @@ public class  AestheticAstar {
 		int miny = Integer.MAX_VALUE;
 
 		while (anode != null) {
-			xs[index] = anode.getX();
-			ys[index] = anode.getY();
+			xs[index] = anode.getCol();
+			ys[index] = anode.getRow();
 
 			if (xs[index] < minx)
 				minx = xs[index];
@@ -790,8 +790,8 @@ public class  AestheticAstar {
 		int miny = Integer.MAX_VALUE;
 		
 		while(anode != null) {
-			xs[index] = anode.getX();
-			ys[index] = anode.getY();
+			xs[index] = anode.getCol();
+			ys[index] = anode.getRow();
 			
 			if(xs[index] <  minx)
 				minx = xs[index];
@@ -876,8 +876,8 @@ public class  AestheticAstar {
 		int miny = Integer.MAX_VALUE;
 		
 		while(anode != null) {
-			xs[index] = anode.getX();
-			ys[index] = anode.getY();
+			xs[index] = anode.getCol();
+			ys[index] = anode.getRow();
 			
 			if(xs[index] <  minx)
 				minx = xs[index];
@@ -981,8 +981,8 @@ public class  AestheticAstar {
 
 	protected Node track(Node anode,int dx, int dy) {
 
-		int x = anode.getX() + dx;
-		int y = anode.getY() + dy;
+		int x = anode.getCol() + dx;
+		int y = anode.getRow() + dy;
 		
 		Node parent = anode.getParent();
 		if(parent == null)
@@ -1095,8 +1095,8 @@ public class  AestheticAstar {
 		
 		Node anode = path;
 		while(anode != null) {
-			int x = anode.getX();
-			int y = anode.getY();
+			int x = anode.getCol();
+			int y = anode.getRow();
 			amap[y][x] = SYM_FULL_PATH;
 			anode = anode.getParent();
 		}
@@ -1132,8 +1132,8 @@ public class  AestheticAstar {
 
 		g2d.setColor(new Color(0,0,0));		
 		while(anode != null) {
-			int x = anode.getX();
-			int y = anode.getY();
+			int x = anode.getCol();
+			int y = anode.getRow();
 			
 			// Correct broken links (there's a bug in straightLong()?)
 			Node parent = anode.getParent();
@@ -1255,8 +1255,8 @@ public class  AestheticAstar {
 	protected boolean inbox(int startx,int starty,int endx,int endy,Node path) {
 		Node anode = path;
 		while(anode != null) {
-			int x = anode.getX();
-			int y = anode.getY();
+			int x = anode.getCol();
+			int y = anode.getRow();
 			if(x >= startx && x < endx && y >= starty && y < endy)
 				return true;
 			anode = anode.getParent();
@@ -1341,14 +1341,14 @@ public class  AestheticAstar {
 			if(gran == null)
 				break;
 
-			int ax = anode.getX();
-			int ay = anode.getY();
+			int ax = anode.getCol();
+			int ay = anode.getRow();
 			
-			int px = parent.getX();
-			int py = parent.getY();
+			int px = parent.getCol();
+			int py = parent.getRow();
 			
-			int gx = gran.getX();
-			int gy = gran.getY();
+			int gx = gran.getCol();
+			int gy = gran.getRow();
 			
 			if(ax == 7 && ay == 35)
 				ax += 0;
@@ -1428,11 +1428,11 @@ public class  AestheticAstar {
 		if(child == null || parent == null)
 			return false;
 		
-    	int dx = anode.getX() - child.getX();
-		int dy = anode.getY() - child.getY();
+    	int dx = anode.getCol() - child.getCol();
+		int dy = anode.getRow() - child.getRow();
 			
-		int nx = anode.getX()+dx;
-		int ny = anode.getY()+dy;
+		int nx = anode.getCol()+dx;
+		int ny = anode.getRow()+dy;
 			
 		if(!parent.equals(nx,ny))
 			return true;
@@ -1442,8 +1442,8 @@ public class  AestheticAstar {
 	}
 	
     protected boolean hugsWall(Node anode) {
-    	int x = anode.getX();
-    	int y = anode.getY();
+    	int x = anode.getCol();
+    	int y = anode.getRow();
     	
     	return hugsWall(x,y);
     }
@@ -1460,8 +1460,8 @@ public class  AestheticAstar {
 	}
 	
 	protected boolean hugsWallCorner(Node anode) {
-		int x = anode.getX();
-		int y = anode.getY();
+		int x = anode.getCol();
+		int y = anode.getRow();
 		
     	return hugsWallCorner(x,y);
 	}
@@ -1579,8 +1579,8 @@ public class  AestheticAstar {
 		
 		// Otherwise check adjacent tiles
 		for (int j = 0; j < xyOffsets.length; j++) {
-			int x = xyOffsets[j][0] + node.getX();
-			int y = xyOffsets[j][1] + node.getY();
+			int x = xyOffsets[j][0] + node.getCol();
+			int y = xyOffsets[j][1] + node.getRow();
 
 			// Check next inbounds
 			// tileMap[0].length means number of columns
@@ -1623,11 +1623,11 @@ public class  AestheticAstar {
 		if(node.getParent() == null)
 			return null;
 		
-		int dx = node.getX() - node.getParent().getX();
-		int dy = node.getY() - node.getParent().getY();
+		int dx = node.getCol() - node.getParent().getCol();
+		int dy = node.getRow() - node.getParent().getRow();
 		
-		int x = node.getX() + dx;
-		int y = node.getY() + dy;
+		int x = node.getCol() + dx;
+		int y = node.getRow() + dy;
 		
 		if(!isInbounds(x,y))
 			return null;
@@ -1647,14 +1647,14 @@ public class  AestheticAstar {
 	 * @return Path.
 	 */
 	public Node getLos(Node src, Node dest) {
-		int nextx = src.getX();
-		int nexty = src.getY();
+		int nextx = src.getCol();
+		int nexty = src.getRow();
 
-		int endx = dest.getX();
-		int endy = dest.getY();
+		int endx = dest.getCol();
+		int endy = dest.getRow();
 
-		int deltay = dest.getY() - src.getY();
-		int deltax = dest.getX() - src.getX();
+		int deltay = dest.getRow() - src.getRow();
+		int deltax = dest.getCol() - src.getCol();
 
 		int stepy = (deltay < 0) ? -1 : 1;
 		int stepx = (deltax < 0) ? -1 : 1;
@@ -1719,9 +1719,9 @@ public class  AestheticAstar {
 			return true;
 		
 		while(true) {
-			int x = path.getX();
+			int x = path.getCol();
 			
-			int y = path.getY();
+			int y = path.getRow();
 			
 			if(tileMap[y][x] != SYM_FREE)
 				return true;

@@ -95,6 +95,8 @@ public class AstarFrame extends JFrame {
     }
     
     protected void initFrame() {
+        setTitle("Interactive A*");
+        
         setDefaultLookAndFeelDecorated(true);
 
         setSize(new Dimension(500, 500));
@@ -127,7 +129,7 @@ public class AstarFrame extends JFrame {
         JPanel stepPanel = new JPanel(new BorderLayout());
 
         // Add the checkbox that allows automated steps
-        runEndCheckBox = new JCheckBox("To end");
+        runEndCheckBox = new JCheckBox("Run to end");
 
         runEndCheckBox.setSelected(false);
 

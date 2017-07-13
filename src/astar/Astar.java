@@ -150,8 +150,8 @@ public class Astar {
                 double cost = steps + heuristic;
                 
                 if(objective == Objective.STEALTHY && curNode.getParent() != null) {
-                	int dx = curNode.getX() - adj.getX();
-                	int dy = curNode.getY() - adj.getY();
+                	int dx = curNode.getCol() - adj.getCol();
+                	int dy = curNode.getRow() - adj.getRow();
                 	
 //                	if(dx != 0 && dy == 0 || dx == 0 && dy != 0)
 //                		cost -= heuristic * 0.05;
@@ -163,10 +163,10 @@ public class Astar {
                 
                 else if(objective == Objective.PRETTY && curNode.getParent() != null) {
                 	Node parent = curNode.getParent();
-                	int dx1 = parent.getX() - curNode.getX();
-                	int dy1 = parent.getY() - curNode.getY();
-                	int dx2 = curNode.getX() - adj.getX();
-                	int dy2 = curNode.getY() - adj.getY();
+                	int dx1 = parent.getCol() - curNode.getCol();
+                	int dy1 = parent.getRow() - curNode.getRow();
+                	int dx2 = curNode.getCol() - adj.getCol();
+                	int dy2 = curNode.getRow() - adj.getRow();
                 	
                 	boolean zags = dx1 != dx2 || dy1 != dy2;
                 	
@@ -225,8 +225,8 @@ public class Astar {
     }
 
     protected boolean hugsWall(Node anode) {
-    	int x = anode.getX();
-    	int y = anode.getY();
+    	int x = anode.getCol();
+    	int y = anode.getRow();
     	
     	return isObstacle(x-1,y) ||
     	       isObstacle(x+1,y) ||
@@ -239,8 +239,8 @@ public class Astar {
      * @return Next adjacent node.
      */
     protected Node getAdjacent(Node parent) {
-        int x = parent.getX();
-        int y = parent.getY();
+        int x = parent.getCol();
+        int y = parent.getRow();
 
         while(indOffset < xyOffsets.length) {
             int adjX = x + xyOffsets[indOffset][0];
@@ -273,7 +273,7 @@ public class Astar {
      * @return True if node is on open list.
      */
     protected boolean onOpenList(Node node) {
-      return onOpenList(node.getX(),node.getY());
+      return onOpenList(node.getCol(),node.getRow());
     }
 
     /** Determines if node at x, y on open list.
@@ -286,7 +286,7 @@ public class Astar {
 
         while(iter.hasNext()) {
             Node candidate = (Node)iter.next();
-            if(candidate.getX() == x && candidate.getY() == y) {
+            if(candidate.getCol() == x && candidate.getRow() == y) {
               return true;
             }
         }
@@ -300,7 +300,7 @@ public class Astar {
      * @return True if node on closed list.
      */
     protected boolean onClosedList(Node node) {
-        return onClosedList(node.getX(),node.getY());
+        return onClosedList(node.getCol(),node.getRow());
     }
 
     /**
@@ -314,7 +314,7 @@ public class Astar {
 
         while(iter.hasNext()) {
             Node candidate = (Node)iter.next();
-            if(candidate.getX() == x && candidate.getY() == y) {
+            if(candidate.getCol() == x && candidate.getRow() == y) {
               return true;
             }
         }
@@ -328,7 +328,7 @@ public class Astar {
      * @return True if node an obstacle.
      */
     protected boolean isObstacle(Node node) {
-      return isObstacle(node.getX(),node.getY());
+      return isObstacle(node.getCol(),node.getRow());
     }
 
     /**
@@ -371,9 +371,9 @@ public class Astar {
      * @return Distance.
      */
     protected double calculateHeuristic(Node adj, Node dest) {
-        double dx = adj.getX() - dest.getX();
+        double dx = adj.getCol() - dest.getCol();
         
-        double dy = adj.getY() - dest.getY();
+        double dy = adj.getRow() - dest.getRow();
         
         double h = 0.0;
         

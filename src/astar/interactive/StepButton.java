@@ -42,26 +42,27 @@ public final class StepButton extends JButton implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent e) {  
+        setEnabled(false);
+        
         new Thread(new Runnable() {
             @Override
             public void run() {                                      
                 do {
                     Node head = astar.find1();
-                    
                     Node dest = astar.getDest();
-
+                    
                     tries++;
                     
                     LinkedList<Node> open = astar.getOpen();
                     LinkedList<Node> closed = astar.getClosed();
-
-                    worldPanel.update(head, astar.getDest(), open, closed);
+                    
+                    worldPanel.update(head, open, closed);
                     
                     if(!runEndCheckBox.isSelected()) {
                         setEnabled(true);
                         return;
                     }
-                     
+                                        
                     if(head == null || head.equals(dest)) {
                         String msg = "Tries: " + tries; 
                         msg += "\nElapsed time: " + 0;

@@ -1,6 +1,5 @@
 package astar.pcg;
 
-import astar.Astar;
 import astar.aes.World;
 import java.util.Random;
 /**

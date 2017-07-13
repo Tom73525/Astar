@@ -84,8 +84,8 @@ public class fdimage extends BufferedImage
 		// Draw the path
 		g2d.setColor(new Color(0,0,0));		
 		while(anode != null) {
-			int x = anode.getX();
-			int y = anode.getY();
+			int x = anode.getCol();
+			int y = anode.getRow();
 			
 			// Correct broken links (there's a bug in straightLong()?)
 			Node parent = anode.getParent();

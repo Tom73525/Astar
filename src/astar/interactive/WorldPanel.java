@@ -44,7 +44,8 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
     private int touchX;
     private int touchY;
     private char[][] map;
-    private Node src;
+    private Node head;
+    private Node start;
     private Node dest;
     private LinkedList<Node> open = new LinkedList<>();
     private LinkedList<Node> closed = new LinkedList<>();
@@ -73,9 +74,8 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
         repaint();
     }
     
-    public void update(Node src, Node dest, LinkedList<Node> open, LinkedList<Node> closed) {
-        this.src = src;
-        this.dest = dest;
+    public void update(Node head, LinkedList<Node> open, LinkedList<Node> closed) {
+        this.head = head;
         this.open = open;
         this.closed = closed;
         
@@ -83,111 +83,6 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
     }
     
     @Override
-//    public void paint(Graphics g) {
-//        super.paint(g);
-//
-//        // Render the world without steps        
-//        for (int row = 0; row < rowCount; row++) {
-//            for (int col = 0; col < colCount; col++) {
-//                char tile = map[row][col];
-//
-//                switch (tile) {
-//                    case World.PLAYER_START_TILE:
-//                        src = new Node(col, row);
-//                        
-//                        g.setColor(COLOR_STEP);
-//                        break;
-//
-//                    case World.WALL_TILE:
-//                        g.setColor(COLOR_WALL);
-//                        break;
-//
-//                    case World.GATEWAY_TILE:
-//                        dest = new Node(col, row);
-//                        
-//                        g.setColor(Color.RED);
-//                        break;
-//
-//                    case World.NO_TILE:
-//                    default:
-//                        g.setColor(Color.WHITE);
-//                }
-//
-//                // Render the cell
-//                int x = mapToPixelX(col);
-//                int y = mapToPixelY(row);
-//
-//                g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-//                
-//                // If start or goal, outline cell in black
-//                if(tile == World.PLAYER_START_TILE || tile == World.GATEWAY_TILE) {
-//                    g.setColor(Color.BLACK);
-//                    g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
-//                }
-//            }
-//        }
-//
-//        if(open == null)
-//            return;
-//        
-//        // Render the pathfinding state: open, closed, and steps
-//        if (true/*open != null*/) {
-//            // Render the open cells
-//            g.setColor(Color.ORANGE);
-//            for (Node node : open) {
-//                int x = mapToPixelX(node.getX());
-//                int y = mapToPixelY(node.getY());
-//                g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-//            }
-//
-//            // Render the closed cells
-//            g.setColor(COLOR_CLOSED);
-//            for (Node node : closed) {
-//                int x = mapToPixelX(node.getX());
-//                int y = mapToPixelY(node.getY());
-//                g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-//            }
-//
-//            // Render the walk so far -- do this last because the current node
-//            // has been moved to the closed list.
-//            Node step = src;
-//            do {
-//                int x = mapToPixelX(step.getX());
-//                int y = mapToPixelY(step.getY());
-//
-//                g.setColor(COLOR_STEP);
-//                g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-//
-//                g.setColor(Color.BLACK);
-//                g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
-//
-//                // Look back to parent to get how we got here
-//                step = step.getParent();
-//            } while (step != null);
-//
-//            // Render the destination (again) as it will be overwritten in the end
-//            int x = mapToPixelX(dest.getX());
-//            int y = mapToPixelY(dest.getY());
-//
-//            g.setColor(COLOR_DEST);
-//            g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-//
-//            g.setColor(Color.BLACK);
-//            g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
-//        }
-//        
-////        // Render start and goal text
-////        g.setColor(Color.BLACK);
-////                        
-////        int x = this.mapToPixelX(src.getX());
-////        int y = this.mapToPixelY(src.getY()) - 5;
-////        g.drawString("Start", x, y);
-////        
-////        x = this.mapToPixelX(dest.getX());
-////        y = this.mapToPixelY(dest.getY()) - 5;
-////        g.drawString("Goal", x, y);
-//    }
-    
     public void paint(Graphics g) {
         super.paint(g);
 
@@ -198,8 +93,9 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
 
                 switch (tile) {
                     case World.PLAYER_START_TILE:
-                        // Only paint the src if there isn't a node for it
-                        if(src != null)
+                        start = new Node(col, row);
+                        
+                        if(head != null)
                             continue;
 
                         g.setColor(COLOR_STEP);
@@ -232,32 +128,32 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
             }
         }
 
-        if (src == null)
+        if (head == null)
             return;
 
         // Render the open cells
         g.setColor(Color.ORANGE);
         for (Node node : open) {
-            int x = mapToPixelX(node.getX());
-            int y = mapToPixelY(node.getY());
+            int x = mapToPixelX(node.getCol());
+            int y = mapToPixelY(node.getRow());
             g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
         }
 
         // Render the closed cells
         g.setColor(COLOR_CLOSED);
         for (Node node : closed) {
-            int x = mapToPixelX(node.getX());
-            int y = mapToPixelY(node.getY());
+            int x = mapToPixelX(node.getCol());
+            int y = mapToPixelY(node.getRow());
             g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
         }
         
         // Render the walk so far -- do this last because the current node
         // has been moved to the closed list.
 
-        Node step = src;
+        Node step = head;
         do {
-            int x = mapToPixelX(step.getX());
-            int y = mapToPixelY(step.getY());
+            int x = mapToPixelX(step.getCol());
+            int y = mapToPixelY(step.getRow());
             
             g.setColor(COLOR_STEP);
             g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
@@ -270,11 +166,11 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
         } while (step != null);
         
         // Render the destination last
-        int x = mapToPixelX(dest.getX());
-        int y = mapToPixelY(dest.getY());
+        int x = mapToPixelX(dest.getCol());
+        int y = mapToPixelY(dest.getRow());
         
         g.setColor(COLOR_DEST);
-        g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
+        g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
         
         g.setColor(Color.BLACK);
         g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
@@ -282,12 +178,12 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
         // Render start and goal text
         g.setColor(Color.BLACK);
                         
-        x = this.mapToPixelX(src.getX());
-        y = this.mapToPixelY(src.getY()) - 5;
+        x = this.mapToPixelX(start.getCol());
+        y = this.mapToPixelY(start.getRow()) - 5;
         g.drawString("Start", x, y);
         
-        x = this.mapToPixelX(dest.getX());
-        y = this.mapToPixelY(dest.getY()) - 5;
+        x = this.mapToPixelX(dest.getCol());
+        y = this.mapToPixelY(dest.getRow()) - 5;
         g.drawString("Goal", x, y);     
     }
     
