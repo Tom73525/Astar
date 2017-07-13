@@ -1,11 +1,12 @@
-package astar;
+package astar.pcg;
 
+import astar.Astar;
 import java.util.Random;
 /**
  *
  * @author Ron
  */
-public class LevelGenerator {
+public class SimpleLevelGenerator {
   public final static int BUFZONE = 4;
   //public final static int BARRIER_FACTOR = 5;
   public final static int BARRIER_FACTOR = 2;
@@ -19,7 +20,7 @@ public class LevelGenerator {
   protected Random ran = new Random();
    
   /** Creates a new instance of LevelGenerator */
-  public LevelGenerator(int width, int height,long seed) {
+  public SimpleLevelGenerator(int width, int height,long seed) {
     this.width = width;
     this.height = height;
       

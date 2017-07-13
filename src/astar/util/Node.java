@@ -185,23 +185,23 @@ public class Node {
 	}
 	
 	public String toString() {
-		String pars = "par()";
+		String pars = "par(none)";
 		if(parent != null) {
 			int parx, pary;
 			parx = parent.getX();
 			pary = parent.getY();
-			pars = "par("+parx+" "+pary+")";
+			pars = "par(x:"+parx+" y:"+pary+")";
 		}
 		
-		String chis = "chi()";
+		String chis = "chi(none)";
 		if(child != null) {
 			int chix, chiy;
 			chix = child.getX();
 			chiy = child.getY();
-			chis = "chi("+chix+" "+chiy+")";
+			chis = "chi(x:"+chix+" y:"+chiy+")";
 		}
 		
-		return "("+x+" "+y+") "+pars+" "+chis;
+		return "(x:"+x+" y:"+y+") "+pars+" "+chis;
 	}
 }
 

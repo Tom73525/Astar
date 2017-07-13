@@ -1,11 +1,14 @@
-package astar.aes;
+package astar.pcg;
+
+import astar.aes.Tools;
+import astar.aes.World;
 
 /**
  * Generates a random level using a series of connected rooms.
  * @author Martin Wells
  */
 
-public class LGenerator
+public class WellsLevelGenerator
 {
    private static final int LEFT_DIR = 0;
    private static final int RIGHT_DIR = 1;
@@ -24,7 +27,7 @@ public class LGenerator
    private int playerStartX, playerStartY;
    private int gatewayX, gatewayY;
 
-   public LGenerator()
+   public WellsLevelGenerator()
    {
    }
    
@@ -32,7 +35,7 @@ public class LGenerator
     * Constructs a level with a given random seed.
     * @param seed Seed
     */
-   public LGenerator(int seed) {
+   public WellsLevelGenerator(int seed) {
        Tools.setRandomizer(seed);
    }
 

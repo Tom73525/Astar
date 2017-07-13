@@ -1,5 +1,7 @@
 package astar;
 
+import astar.aes.World;
+import astar.pcg.SimpleLevelGenerator;
 import astar.util.Node;
 import java.io.*;
 import java.util.*;
@@ -8,12 +10,25 @@ import java.util.*;
  * Main class to implement A* path finding.
  * @author Ron
  */
-public class Astar {
-	public final static int OBJ_STRAIGHT = 0;
-	public final static int OBJ_STANDARD = 1;
-	public final static int OBJ_STEALTH = 2;
-	
-	public final static boolean PRIORITY_STRAIGHT = false;
+public class Astar {   
+    public enum Geometry {
+        MANHATTAN,
+        EUCLIDEAN,
+        CHECKERS,
+        SSE
+    }
+    
+    public enum Objective {
+        STANDARD,
+        PRETTY,
+        STEALTHY,
+    }
+    
+    public final double SQRT_2 = Math.sqrt(2);
+    
+    private static Geometry geometry = Geometry.EUCLIDEAN;
+
+    public final static boolean PRIORITY_STRAIGHT = false;
 	
     /** Destination symbol */
     public final static char SYM_DEST = 'D';
@@ -35,13 +50,15 @@ public class Astar {
     private int width;
     private int height;
     private char[][] tileMap;
-    private int destX;
-    private int destY;
-    private int srcX;
-    private int srcY;
+    private int destX = -1;
+    private int destY = -1;
+    private int srcX = -1;
+    private int srcY = -1;
     private LinkedList openList = new LinkedList();
-    private LinkedList closedList = new LinkedList();
-    private boolean stealthy = true;
+    private LinkedList closedList = new LinkedList();    
+    private Node dest;
+    private Node src;
+    
 
     // Offsets relative to current position in map
     private int[][] xyOffsets = {
@@ -65,14 +82,48 @@ public class Astar {
         try {
           reader = new BufferedReader(new FileReader(name));
         }
-        catch(Exception e) {
+        catch(FileNotFoundException e) {
 
         }
     }
 
+    public Astar(char[][] tileMap) {
+        this.tileMap = tileMap;
+        this.width = tileMap[0].length;
+        this.height = tileMap.length;
+        
+        for(int row=0; row < tileMap.length; row++) {
+            for(int col=0; col < tileMap[0].length; col++) {
+                char tile = tileMap[row][col];
+                
+                switch(tile) {
+                    case World.PLAYER_START_TILE:
+                        this.srcX = col;
+                        this.srcY = row;
+                        break;
+                        
+                    case World.GATEWAY_TILE:
+                        this.destX = col;
+                        this.destY = row;
+                        break;
+                }
+                
+                if(srcX >=0 && srcY >= 0 && destX >=0 && destY >= 0)
+                    break;
+            }
+        }
+        
+        if(srcX < 0 || srcY < 0 || destX < 0 || destY < 0)
+            System.err.println("bad tile map");
+    }
+    
     /**
      * Constructor.
      * @param tileMap Tile map.
+     * @param srcX Source x in world
+     * @param srcY Source y in world
+     * @param destX Destination x in world
+     * @param destY Destination y in world
      */
     public Astar(char[][] tileMap,int srcX,int srcY,int destX, int destY) {
       this.tileMap = tileMap;
@@ -83,32 +134,79 @@ public class Astar {
       this.width = tileMap[0].length;
       this.height = tileMap.length;
     }
+    
+    public static void setGeometry(Geometry geometry) {
+        Astar.geometry = geometry;
+    }
 
     /**
      * Find the path from source to destination.
      * @return
      */
     public Node find() {
-    	return find(OBJ_STANDARD,Integer.MAX_VALUE);
+    	return find(Objective.STANDARD);
     }
     
-    public Node find(int objective) {
-    	return find(objective,Integer.MAX_VALUE);
+    public void begin() {
+        dest = src = null;
     }
     
-//    public Node find(int limit) {
-//    	return find(OBJ_STANDARD,limit);
-//    }
+    public Node find1() {
+        if(src == null && dest == null) {
+            dest = new Node(destX, destY);
+            src = new Node(srcX, srcY);
+
+            moveToOpen(src);
+        }
+
+        while (!openList.isEmpty()) {
+            Node curNode = getLowestCostNode();
+
+            if (curNode.equals(dest)) {
+                return relink(curNode);
+            }
+
+            moveToClosed(curNode);
+
+            // Reset the adjacency state
+            reset();
+
+            // Put all the adjacent nodes on the open list of possibilities
+            do {
+                // Get next adjacent to current node
+                Node adj = getAdjacent(curNode);
+
+                // If there are no more adjacents, we're here
+                if (adj == null) {
+                    break;
+                }
+
+                double heuristic = calculateHeuristic(adj, dest);
+                double steps = adj.getSteps();
+                double cost = steps + heuristic;
+
+                adj.setCost(cost);
+
+                openList.add(adj);
+
+            } while (true);
+            
+            return curNode;
+        }
+        
+        return null;
+    }
     
     /**
      * Find path find source to destination.
-     * @param limit Maximum number of nodes to generate.
+     * @param objective Shape of walk, standard (or shortest) , straight, or stealthy
      * @return Destination node if path found, null if no path found.
      */
-    public Node find(int objective,int limit) {
-        Node dest = new Node(destX,destY);
+    public Node find(Objective objective) {
+        dest = new Node(destX,destY);
+        src = new Node(srcX,srcY);
 
-        moveToOpen(new Node(srcX,srcY));
+        moveToOpen(src);
 
         while(!openList.isEmpty()) {
             Node curNode = getLowestCostNode();
@@ -132,7 +230,7 @@ public class Astar {
                 double steps = adj.getSteps();
                 double cost = steps + heuristic;
                 
-                if(objective == OBJ_STEALTH && curNode.getParent() != null) {
+                if(objective == Objective.STEALTHY && curNode.getParent() != null) {
                 	int dx = curNode.getX() - adj.getX();
                 	int dy = curNode.getY() - adj.getY();
                 	
@@ -144,7 +242,7 @@ public class Astar {
                 	}                		
                 }
                 
-                else if(objective == OBJ_STRAIGHT && curNode.getParent() != null) {
+                else if(objective == Objective.PRETTY && curNode.getParent() != null) {
                 	Node parent = curNode.getParent();
                 	int dx1 = parent.getX() - curNode.getX();
                 	int dy1 = parent.getY() - curNode.getY();
@@ -181,7 +279,7 @@ public class Astar {
                 
                 openList.add(adj);
                 
-                if(Node.idCount > limit)
+                if(Node.idCount > Integer.MAX_VALUE)
                 	return null;
             } while(true);
 
@@ -234,10 +332,10 @@ public class Astar {
             if(adjX < 0 || adjX >= width || adjY < 0 || adjY >= height)
                 continue;
 
-            if(onOpenList(adjX,adjY) || onClosedList(adjX,adjY) || isObstacle(adjX,adjY))
+            if(onOpenList(adjX, adjY) || onClosedList(adjX, adjY) || isObstacle(adjX, adjY))
                 continue;
 
-            return new Node(adjX,adjY,parent);
+            return new Node(adjX, adjY, parent);
         }
 
         return null;
@@ -320,10 +418,13 @@ public class Astar {
      * @param y Y coordinate.
      * @return True if node an obstacle.
      */
-    protected boolean isObstacle(int x,int y) {
+    protected boolean isObstacle(int x, int y) {
+        if(y < 0 || x < 0 || y >= height || x >= width)
+            return false;
+        
         char sym = tileMap[y][x];
 
-        return sym == SYM_OBSTACLE;
+        return sym == World.WALL_TILE;
     }
 
     /**
@@ -335,64 +436,72 @@ public class Astar {
 
         while(iter.hasNext()) {
             Node candidate = (Node)iter.next();
+            
             if(candidate == node) {
                 iter.remove();
+                
                 closedList.add(node);
             }
         }
     }
 
     /**
-     * Calculate heuristic part of cost using Manhattan distance.
+     * Calculate heuristic part of cost using default geometry.
      * @param adj Adjacent node.
      * @param dest Destination node.
      * @return Distance.
      */
-    protected double calculateHeuristic(Node adj,Node dest) {
+    protected double calculateHeuristic(Node adj, Node dest) {
         double dx = adj.getX() - dest.getX();
         
         double dy = adj.getY() - dest.getY();
         
-        double h = goEuclidean(dx,dy);
-//        double h = goManhattan(dx,dy);
-        //double h = goSSE(dx,dy);
-        //double h = goCheckers(dx,dy);
+        double h = 0.0;
+        
+        switch(geometry) {
+            case EUCLIDEAN:
+                h = Math.sqrt(dx * dx + dy * dy);
+                break;
+                
+            case MANHATTAN:
+                h = Math.abs(dx) + Math.abs(dy);
+                break;
+                
+            case CHECKERS:
+                h = Math.max(Math.abs(dx), Math.abs(dy));
+                break;
+                
+            case SSE:
+                h = dx * dx + dy * dy;
+                break;
+        }
         
         return h;
     }
     
-    private double goCheckers(double dx,double dy) {
-    	return Math.max(Math.abs(dx), Math.abs(dy));
-    }
-    
-    private double goSSE(double dx,double dy) {
-    	return dx * dx + dy * dy;
-    }
-    
-    private double goManhattan(double dx,double dy) {
-    	return Math.abs(dx) + Math.abs(dy);
-    }
-    
-    private double goEuclidean(double dx, double dy) {
-    	return Math.sqrt(goSSE(dx,dy));
-    }
-
     /** Find lowest cost node.
      *  Could be improved if nodes added using insertion sort.
      *  @return Node with lowest cost.
      */
     protected Node getLowestCostNode() {
         ListIterator iter = openList.listIterator();
+        
         double minCost = Double.MAX_VALUE;
+        
         Node minNode = null;
+        
         while(iter.hasNext()) {
             Node node = (Node)iter.next();
+            
             double cost = node.getCost();
+            
             if(cost < minCost) {
                 minCost = cost;
+                
                 minNode = node;
             }
         }
+        
         return minNode;
     }
 
@@ -403,8 +512,24 @@ public class Astar {
         indOffset = 0;
     }
 
+    public Node getSrc() {
+        return src;
+    }
+    
+    public Node getDest() {
+        return dest;
+    }
+    
     public char[][] getTileMap() {
     	return tileMap;
+    }
+    
+    public LinkedList getOpen() {
+        return this.openList;
+    }
+    
+    public LinkedList getClosed() {
+        return this.closedList;
     }
     
     /**
@@ -413,7 +538,7 @@ public class Astar {
      */
     public void loadMap() {
         try {
-        	StringTokenizer dims = new StringTokenizer(reader.readLine());
+            StringTokenizer dims = new StringTokenizer(reader.readLine());
         	
             width = Integer.parseInt(dims.nextToken());
 
@@ -457,7 +582,7 @@ public class Astar {
       
       for(int j=0; j < 1000; j++) {
         
-        LevelGenerator lg = new LevelGenerator(25,25,101L+j);
+        SimpleLevelGenerator lg = new SimpleLevelGenerator(25,25,101L+j);
         
         lg.layoutSrcDest();
         
@@ -467,7 +592,7 @@ public class Astar {
         Astar astar0 =
             new Astar(lg.getMap(),lg.getSrcX(),lg.getSrcY(),lg.getDestX(),lg.getDestY());
 
-        Node node0 = astar0.find(NO_LIMIT);
+        Node node0 = astar0.find();
         
         // Get line of sight steps
         int los = node0.getSteps();
@@ -492,7 +617,7 @@ public class Astar {
         int limit = (int) ((md-1) * 5 + 8 + 0.5);
         
         long t0 = System.currentTimeMillis();        
-        Node node = astar1.find(limit);
+        Node node = astar1.find();
         long t1 = System.currentTimeMillis();
         
         totalt += (t1 - t0);

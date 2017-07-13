@@ -1,7 +1,9 @@
 package astar.aes;
 
+import astar.pcg.WellsLevelGenerator;
 import astar.util.Node;
 import astar.Astar;
+import astar.Astar.Objective;
 import astar.aes.fractal.BoxCountingMethod;
 import astar.aes.fractal.fdimage;
 import astar.aes.fractal.fdresult;
@@ -40,11 +42,11 @@ public class  AestheticAstar {
         SSE
     }
     
-    public enum Objective {
-        BASIC,
-        PRETTY,
-        STEALTHY
-    };
+//    public enum Objective {
+//        BASIC,
+//        PRETTY,
+//        STEALTHY
+//    };
 	/** Destination symbol */
 	public final static char SYM_BASIC_DEST = 'd';
 
@@ -114,14 +116,16 @@ public class  AestheticAstar {
 		
 		String type = args[0];
 		
-		int objective = Astar.OBJ_STANDARD;
+		Objective objective = Objective.STANDARD;
 		
 		if(type.equals("a"))
-			objective = Astar.OBJ_STRAIGHT;
+			objective = Objective.STANDARD;
+                
 		else if(type.equals("e"))
-			objective = Astar.OBJ_STEALTH;
+			objective = Objective.STEALTHY;
+                
 		else if(type.equals("s"))
-			objective = Astar.OBJ_STANDARD;
+			objective = Objective.STANDARD;
 		else {
 			System.err.println("bad objective");
 			System.exit(1);
@@ -133,7 +137,7 @@ public class  AestheticAstar {
 		boolean imageFlag = true;
 		
 		// Generate a 50x50 world
-		LGenerator lg = new LGenerator();
+		WellsLevelGenerator lg = new WellsLevelGenerator();
 		
 		char[][] tileMap = lg.generateLevel(10);
 
@@ -150,7 +154,7 @@ public class  AestheticAstar {
 		
 		aes.setR2(Double.parseDouble(args[2]));
 		
-		if(objective == Astar.OBJ_STRAIGHT) {
+		if(objective == Objective.PRETTY) {
 			//aes.straighten(path);
 			aes.straightLong(path);
 		}
