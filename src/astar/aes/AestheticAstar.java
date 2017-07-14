@@ -1,18 +1,16 @@
 package astar.aes;
 
-import astar.pcg.WellsLevelGenerator;
+import astar.pcg.WellsGenerator;
 import astar.util.Node;
 import astar.Astar;
-import astar.Astar.Objective;
 import astar.aes.fractal.BoxCountingMethod;
 import astar.aes.fractal.fdimage;
 import astar.aes.fractal.fdresult;
 import astar.aes.rs.RsPlot;
+import astar.util.Objective;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
@@ -22,17 +20,14 @@ import java.io.FileReader;
 import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.Vector;
+/*import java.util.Vector;*/
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 
 import jsc.correlation.KendallCorrelation;
 import jsc.datastructures.PairedData;
 import jsc.descriptive.MeanVar;
 import jsc.independentsamples.SmirnovTest;
-
-import cern.jet.stat.Gamma;
 
 public class  AestheticAstar {
     public enum Heuristic {
@@ -116,7 +111,7 @@ public class  AestheticAstar {
 		
 		String type = args[0];
 		
-		Objective objective = Objective.STANDARD;
+		Objective objective = Objective.NONE;
 		
 		if(type.equals("a"))
 			objective = Objective.STANDARD;
@@ -137,7 +132,7 @@ public class  AestheticAstar {
 		boolean imageFlag = true;
 		
 		// Generate a 50x50 world
-		WellsLevelGenerator lg = new WellsLevelGenerator();
+		WellsGenerator lg = new WellsGenerator();
 		
 		char[][] tileMap = lg.generateLevel(10);
 
@@ -861,7 +856,7 @@ public class  AestheticAstar {
 		
 		RsPlot rs = new RsPlot();
 		rs.estimate(data);
-		double a[] = rs.calcSlope();
+//		double a[] = rs.calcSlope();
 //		System.out.println(a[0]+" "+data.size()+" "+slope_sum);
 //		System.out.println(a[0]+" "+data.size());
 	}

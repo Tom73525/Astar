@@ -1,29 +1,25 @@
 package astar;
 
 import astar.aes.World;
-import astar.pcg.BasicLevelGenerator;
+import astar.geometry.Euclidean;
+import astar.geometry.IGeometry;
+import astar.pcg.AbstractLevelGenerator;
+import astar.pcg.BasicGenerator;
+import astar.pcg.WellsGenerator;
 import astar.util.Node;
+import astar.util.Objective;
 import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Main class to implement A* path finding.
  * @author Ron
  */
-public class Astar {   
-    public enum Geometry {
-        MANHATTAN,
-        EUCLIDEAN,
-        CHECKERS,
-        SSE
-    }
-    
-    public enum Objective {
-        STANDARD,
-        PRETTY,
-        STEALTHY,
-    }
-    
+public class Astar {          
     public final double SQRT_2 = Math.sqrt(2);
     public final static char SYM_DEST = 'D';
     public final static char SYM_SRC = 'S';
@@ -34,7 +30,8 @@ public class Astar {
     public final static boolean PRIORITY_STRAIGHT = false;
     public final static int NO_LIMIT = 10000;
     
-    protected static Geometry geometry = Geometry.EUCLIDEAN;
+    public IGeometry geometry = new Euclidean(); 
+    public AbstractLevelGenerator levelGenerator = new WellsGenerator();
     
     protected BufferedReader reader;
     protected int width;
@@ -48,6 +45,11 @@ public class Astar {
     protected LinkedList closedList = new LinkedList();    
     protected Node dest;
     protected Node src;
+    protected int level = 5;
+    protected int seed = 0;
+    protected boolean debug;
+
+
     
     // Offsets relative to current position in map
     protected int[][] xyOffsets = {
@@ -65,7 +67,9 @@ public class Astar {
     protected int indOffset;
     
     public Astar() {
+        initConfig();
         
+        initLevel();
     }
     
     /**
@@ -73,6 +77,8 @@ public class Astar {
      * @param name File name.
     */
     public Astar(String name) {
+        this();
+        
         try {
           reader = new BufferedReader(new FileReader(name));
         }
@@ -90,20 +96,95 @@ public class Astar {
      * @param destX Destination x in world
      * @param destY Destination y in world
      */
-    public Astar(char[][] tileMap,int srcX,int srcY,int destX, int destY) {
-      this.tileMap = tileMap;
-      this.srcX = srcX;
-      this.srcY = srcY;
-      this.destX = destX;
-      this.destY = destY;
-      this.width = tileMap[0].length;
-      this.height = tileMap.length;
+    public Astar(char[][] tileMap, int srcX, int srcY, int destX, int destY) {
+        this();
+        
+        this.tileMap = tileMap;
+        this.srcX = srcX;
+        this.srcY = srcY;
+        this.destX = destX;
+        this.destY = destY;
+        this.width = tileMap[0].length;
+        this.height = tileMap.length;
+    }
+    /**
+     * Initializes the configuration.
+     */
+    protected final void initConfig() {
+        String value = System.getProperty("astar.debug");
+        if(value != null && value.equals("true"))
+            debug = true;
+            
+        value = System.getProperty("astar.seed");
+        if (value != null) {
+            seed = Integer.parseInt(value);
+        }
+
+        value = System.getProperty("astar.level");
+        if (value != null) {
+            level = Integer.parseInt(value);
+        }
+        
+        String className = System.getProperty("astar.geometry");
+        if(className != null) {
+            try {
+                Class<?> cl = Class.forName(className);
+                 geometry = (IGeometry) cl.newInstance();
+                 
+            } catch (ClassNotFoundException ex) {
+            } catch (InstantiationException | IllegalAccessException ex) {
+                Logger.getLogger(Astar.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
     }
     
-    public static void setGeometry(Geometry geometry) {
-        Astar.geometry = geometry;
-    }
+    protected final void initLevel() {
+        String className = System.getProperty("astar.lg");
+        
+        if (className == null)
+            className = "astar.pcg.WellsGenerator";
 
+        try {
+            Class<?> clzz = Class.forName(className);
+
+            Constructor<?> cons = clzz.getConstructor(Integer.class);
+
+            this.levelGenerator = (AbstractLevelGenerator) cons.newInstance(seed);
+
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+            System.err.println("bad level generator");
+            System.exit(1);
+        }
+        
+        this.tileMap = levelGenerator.generateLevel(level);
+        this.width = tileMap[0].length;
+        this.height = tileMap.length;
+        
+        for(int row=0; row < tileMap.length; row++) {
+            for(int col=0; col < tileMap[0].length; col++) {
+                char tile = tileMap[row][col];
+                
+                switch(tile) {
+                    case World.PLAYER_START_TILE:
+                        this.srcX = col;
+                        this.srcY = row;
+                        break;
+                        
+                    case World.GATEWAY_TILE:
+                        this.destX = col;
+                        this.destY = row;
+                        break;
+                }
+                
+                if(this.srcX < 0 && this.srcY < 0 && this.destX >=0 && this.destY >= 0) {
+                    System.err.println("bad tile map");
+                    System.exit(1);
+                }
+            }
+        }        
+    }
+    
     /**
      * Find the path from source to destination.
      * @return
@@ -146,7 +227,9 @@ public class Astar {
                     break;
 
                 double heuristic = calculateHeuristic(adj,dest);
+                
                 double steps = adj.getSteps();
+                
                 double cost = steps + heuristic;
                 
                 if(objective == Objective.STEALTHY && curNode.getParent() != null) {
@@ -163,9 +246,13 @@ public class Astar {
                 
                 else if(objective == Objective.PRETTY && curNode.getParent() != null) {
                 	Node parent = curNode.getParent();
+                        
                 	int dx1 = parent.getCol() - curNode.getCol();
+                        
                 	int dy1 = parent.getRow() - curNode.getRow();
+                        
                 	int dx2 = curNode.getCol() - adj.getCol();
+                        
                 	int dy2 = curNode.getRow() - adj.getRow();
                 	
                 	boolean zags = dx1 != dx2 || dy1 != dy2;
@@ -178,6 +265,7 @@ public class Astar {
                 		cost += .001;
                 	*/
                 	///*
+                        
                 	double strength = adj.getInertia();
                	
                 	if(strength < 8) {
@@ -192,7 +280,7 @@ public class Astar {
                 		else if(hugs && zags) {
                 			cost += 13;
                 		}
-                	}//*/
+                	}
                 }
                 adj.setCost(cost);
                 
@@ -214,28 +302,38 @@ public class Astar {
      */
     protected Node relink(Node path) {
     	Node anode = path;
+        
     	Node child = null;
+        
     	while(anode != null) {
     		anode.setChild(child);
+                
     		child = anode;
+                
     		anode = anode.getParent();
     	}
     	
     	return path;
     }
 
-    protected boolean hugsWall(Node anode) {
-    	int x = anode.getCol();
-    	int y = anode.getRow();
+    /**
+     * Returns true if this node is adjacent to an obstacle.
+     * @param node
+     * @return 
+     */
+    protected boolean hugsWall(Node node) {
+    	int col = node.getCol();
+    	int row = node.getRow();
     	
-    	return isObstacle(x-1,y) ||
-    	       isObstacle(x+1,y) ||
-    	       isObstacle(x,y-1) ||
-    	       isObstacle(x,y+1);
+    	return isObstacle(col-1, row) ||
+    	       isObstacle(col+1, row) ||
+    	       isObstacle(col, row-1) ||
+    	       isObstacle(col, row+1);
     }
     
     /**
      * Get next adjacent node relative to parent node.
+     * @param parent Parent to this node
      * @return Next adjacent node.
      */
     protected Node getAdjacent(Node parent) {
@@ -371,31 +469,9 @@ public class Astar {
      * @return Distance.
      */
     protected double calculateHeuristic(Node adj, Node dest) {
-        double dx = adj.getCol() - dest.getCol();
+        double dist = geometry.distance(adj, dest);
         
-        double dy = adj.getRow() - dest.getRow();
-        
-        double h = 0.0;
-        
-        switch(geometry) {
-            case EUCLIDEAN:
-                h = Math.sqrt(dx * dx + dy * dy);
-                break;
-                
-            case MANHATTAN:
-                h = Math.abs(dx) + Math.abs(dy);
-                break;
-                
-            case CHECKERS:
-                h = Math.max(Math.abs(dx), Math.abs(dy));
-                break;
-                
-            case SSE:
-                h = dx * dx + dy * dy;
-                break;
-        }
-        
-        return h;
+        return dist;
     }
     
     /** Find lowest cost node.
@@ -488,7 +564,7 @@ public class Astar {
             }
         }
         catch(Exception e) {
-          e.printStackTrace();
+          System.err.println(e);
         }
     }
 
@@ -501,7 +577,7 @@ public class Astar {
       
       for(int j=0; j < 1000; j++) {
         
-        BasicLevelGenerator lg = new BasicLevelGenerator(101);
+        BasicGenerator lg = new BasicGenerator(101);
         
         lg.layoutSrcDest();
         
@@ -541,13 +617,6 @@ public class Astar {
         
         totalt += (t1 - t0);
 
-        if(node != null) {
-          //node.print();          
-          ;//System.out.println(Node.idCount+" "+((md-1)*5+8)+" "+node.getSteps()+" "+los);
-          //lg.print();
-        }
-        else
-          ;//System.out.println("NO PATH "+Node.idCount+" "+limit);
       }
       
       System.out.println("runtime = "+totalt);

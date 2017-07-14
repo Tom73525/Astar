@@ -116,8 +116,10 @@ public final class StepButton extends JButton implements ActionListener {
                     if(head.equals(dest)) {
                         int distance = Math.round((float)head.getSteps());
                         
-                        String msg = "Tries: " + tries; 
+                        String msg = "Geometry: " + astar.geometry.getClass().getSimpleName();
+                        msg += "\nTries: " + tries; 
                         msg += "\nDistance: " + distance;
+                        msg += "\nNodes: " + Node.idCount;
                         
                         JOptionPane.showMessageDialog(frame, msg);
                         

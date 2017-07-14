@@ -11,35 +11,8 @@ import astar.util.Node;
  */
 public class SingleStepAstar extends Astar {
     
-    public SingleStepAstar(char[][] tileMap) {
-
-        this.tileMap = tileMap;
-        this.width = tileMap[0].length;
-        this.height = tileMap.length;
-        
-        for(int row=0; row < tileMap.length; row++) {
-            for(int col=0; col < tileMap[0].length; col++) {
-                char tile = tileMap[row][col];
-                
-                switch(tile) {
-                    case World.PLAYER_START_TILE:
-                        this.srcX = col;
-                        this.srcY = row;
-                        break;
-                        
-                    case World.GATEWAY_TILE:
-                        this.destX = col;
-                        this.destY = row;
-                        break;
-                }
-                
-                if(srcX >=0 && srcY >= 0 && destX >=0 && destY >= 0)
-                    break;
-            }
-        }
-        
-        if(srcX < 0 || srcY < 0 || destX < 0 || destY < 0)
-            System.err.println("bad tile map");
+    public SingleStepAstar() {
+        super();
     } 
     
     public Node find1() {

@@ -1,13 +1,8 @@
 package astar.interactive;
 
-import astar.pcg.AbstractLevelGenerator;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -31,67 +26,28 @@ public class AstarFrame extends JFrame {
     protected int seed = 0;
     protected int level = 10;
     protected char[][] tileMap;
-    private AbstractLevelGenerator levelGenerator;
-    private boolean debug = false;
+    protected boolean debug = false;
 
     public AstarFrame() {
         init();
     }
 
-    protected final void init() {
-        initConfig();
-        
+    protected final void init() {        
         initWorld();
         
         initFrame();
-    }
-
-    /**
-     * Initializes the configuration.
-     */
-    protected void initConfig() {
-        String debugs = System.getProperty("astar.debug");
-        if(debugs != null && debugs.equals("true"))
-            debug = true;
-            
-        String seeds = System.getProperty("astar.seed");
-        if (seeds != null) {
-            seed = Integer.parseInt(seeds);
-        }
-
-        String levels = System.getProperty("astar.level");
-        if (levels != null) {
-            level = Integer.parseInt(levels);
-        }
-
-        String className = System.getProperty("astar.lg");
         
-        if (className == null)
-            className = "astar.pcg.WellsLevelGenerator";
-
-        try {
-            Class<?> cl = Class.forName(className);
-
-            Constructor<?> cons = cl.getConstructor(Integer.class);
-
-            this.levelGenerator = (AbstractLevelGenerator) cons.newInstance(seed);
-
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-
-        } catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
-            Logger.getLogger(AstarFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        String value = System.getProperty("astar.debug");
+        if(value != null && value.toLowerCase().equals("true"))
+            debug = true;
     }
     
     protected void initWorld() {
-        tileMap = levelGenerator.generateLevel(level); 
+        astar = new SingleStepAstar();
         
-        System.out.println(tileMap.length + " x " + tileMap[0].length);
+        if(debug) astar.levelGenerator.dump();
         
-        if(debug)
-            levelGenerator.dump();
-        
-        astar = new SingleStepAstar(tileMap);
+        if(debug) System.out.println(tileMap.length + " x " + tileMap[0].length);
     }
     
     protected void initFrame() {
@@ -106,7 +62,7 @@ public class AstarFrame extends JFrame {
         Container contentPane = getContentPane();
 
         // Configure the world panel where
-        worldPanel = new WorldPanel(tileMap);
+        worldPanel = new WorldPanel(astar.getTileMap());
 
         worldPanel.setPreferredSize(new Dimension(800, 800));
 

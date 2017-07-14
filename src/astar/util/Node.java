@@ -59,7 +59,7 @@ public class Node {
 
         this.parent = parent;
         
-        parent.child = this;
+//        parent.child = this;
         
         this.steps = parent.steps;
         

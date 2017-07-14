@@ -8,7 +8,7 @@ import astar.aes.World;
  * @author Martin Wells
  */
 
-public class WellsLevelGenerator extends AbstractLevelGenerator
+public class WellsGenerator extends AbstractLevelGenerator
 {
    private static final int LEFT_DIR = 0;
    private static final int RIGHT_DIR = 1;
@@ -27,7 +27,7 @@ public class WellsLevelGenerator extends AbstractLevelGenerator
    private int playerStartX, playerStartY;
    private int gatewayX, gatewayY;
 
-   public WellsLevelGenerator()
+   public WellsGenerator()
    {
        super(0);
    }
@@ -36,7 +36,7 @@ public class WellsLevelGenerator extends AbstractLevelGenerator
     * Constructs a level with a given random seed.
     * @param seed Seed
     */
-   public WellsLevelGenerator(Integer seed) {
+   public WellsGenerator(Integer seed) {
        super(seed);
    }
 

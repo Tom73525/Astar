@@ -1,14 +1,14 @@
 package astar.aes;
 
-import astar.pcg.WellsLevelGenerator;
+import astar.pcg.WellsGenerator;
 import astar.util.Node;
 
 public class Flower {
-	private WellsLevelGenerator lg;
+	private WellsGenerator lg;
 	private Node fullPath;
 	private Node basicPath;
 	
-	public Flower(WellsLevelGenerator lg) {
+	public Flower(WellsGenerator lg) {
 		this.lg = lg;
 	}
 	

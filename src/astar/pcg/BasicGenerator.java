@@ -6,7 +6,7 @@ import java.util.Random;
  *
  * @author RonColeman
  */
-public class BasicLevelGenerator extends AbstractLevelGenerator {
+public class BasicGenerator extends AbstractLevelGenerator {
   public final static int BUFZONE = 4;
   //public final static int BARRIER_FACTOR = 5;
   public final static int BARRIER_FACTOR = 2;
@@ -22,14 +22,14 @@ public class BasicLevelGenerator extends AbstractLevelGenerator {
   /** Creates a new instance of LevelGenerator
      * @param seed
    */
-  public BasicLevelGenerator(Integer seed) {
+  public BasicGenerator(Integer seed) {
     super(seed);
   }
   
   @Override
   public char[][] generateLevel(int level) {
-    this.width = level * 5;
-    this.height = level * 5;
+    this.width = 30 + level * 2;
+    this.height = 30 + level * 2;
       
     tileMap = new char[height][width];
         
