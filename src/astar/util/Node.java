@@ -1,3 +1,25 @@
+/*
+ Copyright (c) Ron Coleman
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package astar.util;
 
 /**
@@ -5,12 +27,13 @@ package astar.util;
  */
 public class Node {
     public static int idCount;
+    public static double SQRT_2 = Math.sqrt(2);
     private int col;
     private int row;
     private Node parent;
     private Node child;
     private double cost = 0;
-    private int steps = 0;
+    private double steps = 0;
     private int id;
     private double inertia;
 
@@ -31,19 +54,33 @@ public class Node {
      * @param row Row coordinate.
      * @param parent Parent node of node.
      */
-    public Node(int col,int row,Node parent) {
+    public Node(int col,int row, Node parent) {
         this(col,row);
 
         this.parent = parent;
+        
         parent.child = this;
-        this.steps = parent.steps + 1;        
+        
+        this.steps = parent.steps;
+        
+        // If we're traveling straight horizontally or vertically, add 1 to
+        // the steps. However, if travelling diagonally, add sqrt(2).
+        int dr = row - parent.getRow();
+        int dc = col - parent.getCol();
+        
+        int dir = dr * dc;
+        
+        if(dir == 0)
+            this.steps += 1.0;
+        else
+            this.steps += SQRT_2;
     }
 
     /** Copy constructor
      * @param node Node to copy.
      */
     public Node(Node node) {
-      this(node.col,node.row);
+      this(node.col, node.row);
     }
     
     /**
@@ -72,22 +109,25 @@ public class Node {
     }
     
     /**
-     * Gets the node at x, y if it exists going forward this node.
-     * @param col
-     * @param row
+     * Gets the node at col, row if it exists going forward this node.
+     * @param col Column
+     * @param row Row
      * @return
      */
     public Node getNode(int col, int row) {
-    	if(equals(col,row))
-    		return this;
-    	
-    	Node anode = this.getChild();
-    	while(anode != null) {
-    		if(anode.equals(col,row))
-    			return anode;
-    		anode = anode.getChild();
-    	}
-    	return null;
+        if (equals(col, row))
+            return this;
+
+        Node anode = this.getChild();
+
+        while (anode != null) {
+            if (anode.equals(col, row))
+                return anode;
+
+            anode = anode.getChild();
+        }
+        
+        return null;
     }
     
     /**
@@ -120,7 +160,7 @@ public class Node {
      * Get steps from parent.
      * @return Steps from parent.
      */
-    public int getSteps() {
+    public double getSteps() {
         return steps;
     }
 

@@ -514,7 +514,7 @@ public class Astar {
         Node node0 = astar0.find();
         
         // Get line of sight steps
-        int los = node0.getSteps();
+        double los = node0.getSteps();
         
         //Astar Astar = new Astar(args[0]);
         //Astar.loadMap();

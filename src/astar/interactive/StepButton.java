@@ -1,7 +1,24 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ Copyright (c) Ron Coleman
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package astar.interactive;
 
@@ -14,8 +31,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 
 /**
- *
- * @author roncoleman
+ * This class implements the step button.
+ * @author Ron Coleman
  */
 public final class StepButton extends JButton implements ActionListener {
 
@@ -25,21 +42,37 @@ public final class StepButton extends JButton implements ActionListener {
     private int tries = 0;
     private final AstarFrame frame;
     
+    /**
+     * Constructor.
+     * @param frame Parent frame
+     */
     public StepButton(AstarFrame frame) {
         super("Step");
+        
         this.frame = frame;
+        
         this.worldPanel = frame.worldPanel;
+        
         this.astar = frame.astar;
+        
         this.runEndCheckBox = frame.runEndCheckBox;
         
         init();
     }
     
+    /**
+     * Initialize the button.
+     */
     protected void init() {
-        this.addActionListener(this);  
+        this.addActionListener(this); 
+        
         astar.begin();
     }
     
+    /**
+     * Responds to a button click.
+     * @param e Event
+     */
     @Override
     public void actionPerformed(ActionEvent e) {  
         setEnabled(false);
@@ -48,24 +81,43 @@ public final class StepButton extends JButton implements ActionListener {
             @Override
             public void run() {                                      
                 do {
+                    // Gets the current lowest cost node which is back linked
+                    // to its parent.
                     Node head = astar.find1();
-                    Node dest = astar.getDest();
                     
                     tries++;
                     
-                    LinkedList<Node> open = astar.getOpen();
-                    LinkedList<Node> closed = astar.getClosed();
+                    // If the head is null, it means we didn't find a path
+                    if(head == null) {
+                        String msg = "Tries: " + tries;
+                        msg += "\nElapsed time: " + 0;
+                        
+                        JOptionPane.showMessageDialog(frame, msg,"No path found",JOptionPane.ERROR_MESSAGE); 
+
+                        return;
+                    }
+
+                    // Update the world panel with the state change
+                    LinkedList<Node> openNodes = astar.getOpen();
+                    LinkedList<Node> closedNodes = astar.getClosed();
                     
-                    worldPanel.update(head, open, closed);
+                    worldPanel.update(head, openNodes, closedNodes);
                     
+                    // If the run-to-end box is NOT checked reenable this button
+                    // and return since we're doing just one step.
                     if(!runEndCheckBox.isSelected()) {
                         setEnabled(true);
                         return;
                     }
-                                        
-                    if(head == null || head.equals(dest)) {
+                            
+                    // If the head is the destination, then we're done                    
+                    Node dest = astar.getDest();
+                    
+                    if(head.equals(dest)) {
+                        int distance = Math.round((float)head.getSteps());
+                        
                         String msg = "Tries: " + tries; 
-                        msg += "\nElapsed time: " + 0;
+                        msg += "\nDistance: " + distance;
                         
                         JOptionPane.showMessageDialog(frame, msg);
                         
@@ -74,12 +126,19 @@ public final class StepButton extends JButton implements ActionListener {
                         return;
                     }
                     
+                    // If we haven't reached the goal, sleep for a while and
+                    // try again.
                     sleep(300);
+                    
                 } while (true);
             }
         }).start();
     }
     
+    /**
+     * Sleeps for specified amount of time.
+     * @param time Specified time
+     */
     private void sleep(int time) {
         try {
             Thread.sleep(time);
