@@ -22,6 +22,7 @@
  */
 package astar.interactive;
 
+import astar.plugijn.IModel;
 import astar.util.Node;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,7 +36,8 @@ import javax.swing.JOptionPane;
  * @author Ron Coleman
  */
 public final class StepButton extends JButton implements ActionListener {
-
+    public final static int DELAY = 300;
+    
     private final WorldPanel worldPanel;
     private final SingleStepAstar astar;
     private final JCheckBox runEndCheckBox;
@@ -78,6 +80,9 @@ public final class StepButton extends JButton implements ActionListener {
         setEnabled(false);
         
         new Thread(new Runnable() {
+            /**
+             * Runs the game loop.
+             */
             @Override
             public void run() {                                      
                 do {
@@ -103,6 +108,9 @@ public final class StepButton extends JButton implements ActionListener {
                     
                     worldPanel.update(head, openNodes, closedNodes);
                     
+                    // Render the world panel
+                    worldPanel.render();
+                    
                     // If the run-to-end box is NOT checked reenable this button
                     // and return since we're doing just one step.
                     if(!runEndCheckBox.isSelected()) {
@@ -114,11 +122,27 @@ public final class StepButton extends JButton implements ActionListener {
                     Node dest = astar.getDest();
                     
                     if(head.equals(dest)) {
+                        // If there's a model, tweak it and run update one last time
+                        IModel model = astar.getModel();
+                        
+                        if(model != null) {
+                            // Sleep here may not be necessary but allows last repaint run
+                            sleep(DELAY);
+                            
+                            model.tweak(head);
+                            
+                            worldPanel.update(head, openNodes, closedNodes);
+                        }
+                        
                         int distance = Math.round((float)head.getSteps());
                         
-                        String msg = "Geometry: " + astar.geometry.getClass().getSimpleName();
+                        String msg = "Geometry: " +
+                                astar.getGeometry().getClass().getSimpleName();
+                        
                         msg += "\nTries: " + tries; 
+                        
                         msg += "\nDistance: " + distance;
+                        
                         msg += "\nNodes: " + Node.idCount;
                         
                         JOptionPane.showMessageDialog(frame, msg);
@@ -128,9 +152,8 @@ public final class StepButton extends JButton implements ActionListener {
                         return;
                     }
                     
-                    // If we haven't reached the goal, sleep for a while and
-                    // try again.
-                    sleep(300);
+                    // If we haven't reached the goal, wait a while and try again.
+                    sleep(DELAY);
                     
                 } while (true);
             }
@@ -148,15 +171,6 @@ public final class StepButton extends JButton implements ActionListener {
         } catch (InterruptedException ex) {
             
         }
-    }
-    
-}
-
-class Stepper implements Runnable {
-    
-    @Override
-    public void run() {
-        
     }
     
 }

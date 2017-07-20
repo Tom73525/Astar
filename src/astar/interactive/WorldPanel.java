@@ -1,7 +1,24 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ Copyright (c) Ron Coleman
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package astar.interactive;
 
@@ -70,15 +87,21 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
     
     private void init() {
         addMouseListener(this);
+        
         addMouseMotionListener(this);
-        repaint();
+        
+        render();
     }
     
     public void update(Node head, LinkedList<Node> open, LinkedList<Node> closed) {
         this.head = head;
-        this.open = open;
-        this.closed = closed;
         
+        this.open = open;
+        
+        this.closed = closed;
+    }
+    
+    public void render() {
         repaint();
     }
     
@@ -91,6 +114,9 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
             for (int col = 0; col < colCount; col++) {
                 char tile = map[row][col];
 
+                int x = translateColToX(col);
+                int y = translateRowToY(row);
+                
                 switch (tile) {
                     case World.PLAYER_START_TILE:
                         start = new Node(col, row);
@@ -99,31 +125,32 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
                             continue;
 
                         g.setColor(COLOR_STEP);
+                        g.fillOval(x, y, CELL_SIZE, CELL_SIZE);
+                        
+                        g.setColor(Color.BLACK);
+                        g.drawOval(x, y, CELL_SIZE, CELL_SIZE);
                         break;
 
                     case World.WALL_TILE:
                         g.setColor(COLOR_WALL);
+                        
+                        g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
                         break;
 
                     case World.GATEWAY_TILE:
                         dest = new Node(col, row);
                         
                         g.setColor(Color.RED);
+                        g.fillOval(x, y, CELL_SIZE, CELL_SIZE);
+                        
+                        g.setColor(Color.BLACK);
+                        g.drawOval(x, y, CELL_SIZE, CELL_SIZE);
                         break;
 
                     case World.NO_TILE:
                     default:
                         g.setColor(Color.WHITE);
-                }
-
-                int x = mapToPixelX(col);
-                int y = mapToPixelY(row);
-
-                g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-                
-                if(tile == World.PLAYER_START_TILE || tile == World.GATEWAY_TILE) {
-                    g.setColor(Color.BLACK);
-                    g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
+                        g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
                 }
             }
         }
@@ -134,16 +161,16 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
         // Render the open cells
         g.setColor(Color.ORANGE);
         for (Node node : open) {
-            int x = mapToPixelX(node.getCol());
-            int y = mapToPixelY(node.getRow());
+            int x = translateColToX(node.getCol());
+            int y = translateRowToY(node.getRow());
             g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
         }
 
         // Render the closed cells
         g.setColor(COLOR_CLOSED);
         for (Node node : closed) {
-            int x = mapToPixelX(node.getCol());
-            int y = mapToPixelY(node.getRow());
+            int x = translateColToX(node.getCol());
+            int y = translateRowToY(node.getRow());
             g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
         }
         
@@ -152,52 +179,52 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
 
         Node step = head;
         do {
-            int x = mapToPixelX(step.getCol());
-            int y = mapToPixelY(step.getRow());
+            int x = translateColToX(step.getCol());
+            int y = translateRowToY(step.getRow());
             
             g.setColor(COLOR_STEP);
-            g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+            g.fillOval(x, y, CELL_SIZE, CELL_SIZE);
             
             g.setColor(Color.BLACK);
-            g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
+            g.drawOval(x, y, CELL_SIZE, CELL_SIZE);
 
             // Look back to parent to get how we got here
             step = step.getParent();
         } while (step != null);
         
         // Render the destination last
-        int x = mapToPixelX(dest.getCol());
-        int y = mapToPixelY(dest.getRow());
+        int x = translateColToX(dest.getCol());
+        int y = translateRowToY(dest.getRow());
         
         g.setColor(COLOR_DEST);
-        g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+        g.fillOval(x, y, CELL_SIZE, CELL_SIZE);
         
         g.setColor(Color.BLACK);
-        g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
+        g.drawOval(x, y, CELL_SIZE, CELL_SIZE);
         
         // Render start and goal text
         g.setColor(Color.BLACK);
                         
-        x = this.mapToPixelX(start.getCol());
-        y = this.mapToPixelY(start.getRow()) - 5;
+        x = this.translateColToX(start.getCol());
+        y = this.translateRowToY(start.getRow()) - 5;
         g.drawString("Start", x, y);
         
-        x = this.mapToPixelX(dest.getCol());
-        y = this.mapToPixelY(dest.getRow()) - 5;
+        x = this.translateColToX(dest.getCol());
+        y = this.translateRowToY(dest.getRow()) - 5;
         g.drawString("Goal", x, y);     
     }
     
     
-    private int mapToPixelX(int coord) {
-        int index = coord * (CELL_SIZE + CELL_INSET) + CELL_INSET + baseX;
+    private int translateColToX(int col) {
+        int x = col * (CELL_SIZE + CELL_INSET) + CELL_INSET + baseX;
         
-        return index;
+        return x;
     }
     
-    private int mapToPixelY(int coord) {
-        int index = coord * (CELL_SIZE + CELL_INSET) + CELL_INSET + baseY;
+    private int translateRowToY(int row) {
+        int y = row * (CELL_SIZE + CELL_INSET) + CELL_INSET + baseY;
         
-        return index;
+        return y;
     }
 
     @Override

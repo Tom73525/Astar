@@ -1,16 +1,37 @@
+/*
+ Copyright (c) Ron Coleman
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package astar;
 
 import astar.aes.World;
 import astar.geometry.Euclidean;
-import astar.geometry.IGeometry;
-import astar.pcg.AbstractLevelGenerator;
+import astar.plugijn.IGeometry;
+import astar.plugijn.ILevelGenerator;
 import astar.pcg.BasicGenerator;
 import astar.pcg.WellsGenerator;
+import astar.plugijn.IModel;
+import astar.util.Helper;
 import astar.util.Node;
-import astar.util.Objective;
 import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,8 +51,9 @@ public class Astar {
     public final static boolean PRIORITY_STRAIGHT = false;
     public final static int NO_LIMIT = 10000;
     
-    public IGeometry geometry = new Euclidean(); 
-    public AbstractLevelGenerator levelGenerator = new WellsGenerator();
+    protected IGeometry geometry = new Euclidean(); 
+    protected ILevelGenerator levelGenerator = new WellsGenerator();
+    protected IModel model = null;
     
     protected BufferedReader reader;
     protected int width;
@@ -136,7 +158,18 @@ public class Astar {
                 Logger.getLogger(Astar.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
+        
+        className = System.getProperty("astar.model");
+        if(className != null) {
+            try {
+                Class<?> cl = Class.forName(className);
+                 model = (IModel) cl.newInstance();
+                 
+            } catch (ClassNotFoundException ex) {
+            } catch (InstantiationException | IllegalAccessException ex) {
+                Logger.getLogger(Astar.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
     
     protected final void initLevel() {
@@ -148,11 +181,11 @@ public class Astar {
         try {
             Class<?> clzz = Class.forName(className);
 
-            Constructor<?> cons = clzz.getConstructor(Integer.class);
+            this.levelGenerator = (ILevelGenerator) clzz.newInstance();
+            
+            this.levelGenerator.init(seed);
 
-            this.levelGenerator = (AbstractLevelGenerator) cons.newInstance(seed);
-
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | SecurityException ex) {
             System.err.println("bad level generator");
             System.exit(1);
         }
@@ -185,24 +218,15 @@ public class Astar {
         }        
     }
     
-    /**
-     * Find the path from source to destination.
-     * @return
-     */
-    public Node find() {
-    	return find(Objective.STANDARD);
-    }
-    
     public void begin() {
         dest = src = null;
     }
     
     /**
      * Find path find source to destination.
-     * @param objective Shape of walk, standard (or shortest) , straight, or stealthy
      * @return Destination node if path found, null if no path found.
      */
-    public Node find(Objective objective) {
+    public Node find() {
         dest = new Node(destX,destY);
         src = new Node(srcX,srcY);
 
@@ -221,76 +245,30 @@ public class Astar {
 
             do {
                 // Get next adjacent to current node
-                Node adj = getAdjacent(curNode);
+                Node adjNode = getAdjacent(curNode);
 
-                if(adj == null)
+                if(adjNode == null)
                     break;
 
-                double heuristic = calculateHeuristic(adj,dest);
+                double heuristic = calculateHeuristic(adjNode,dest);
                 
-                double steps = adj.getSteps();
+                double steps = adjNode.getSteps();
                 
                 double cost = steps + heuristic;
                 
-                if(objective == Objective.STEALTHY && curNode.getParent() != null) {
-                	int dx = curNode.getCol() - adj.getCol();
-                	int dy = curNode.getRow() - adj.getRow();
-                	
-//                	if(dx != 0 && dy == 0 || dx == 0 && dy != 0)
-//                		cost -= heuristic * 0.05;
-                	
-                	if(hugsWall(adj)) {
-                		cost -= heuristic * 0.10;
-                	}                		
-                }
-                
-                else if(objective == Objective.PRETTY && curNode.getParent() != null) {
-                	Node parent = curNode.getParent();
-                        
-                	int dx1 = parent.getCol() - curNode.getCol();
-                        
-                	int dy1 = parent.getRow() - curNode.getRow();
-                        
-                	int dx2 = curNode.getCol() - adj.getCol();
-                        
-                	int dy2 = curNode.getRow() - adj.getRow();
-                	
-                	boolean zags = dx1 != dx2 || dy1 != dy2;
-                	
-                	if(!zags)
-                		adj.setInertia(curNode.getInertia()+1);
-                	
-                	/* Rabin algorithm
-                	if(zags)
-                		cost += .001;
-                	*/
-                	///*
-                        
-                	double strength = adj.getInertia();
-               	
-                	if(strength < 8) {
-                		boolean hugs = hugsWall(adj);
+                if(model != null)
+                    cost += model.expense(heuristic, curNode, adjNode);
 
-                		if(hugs && !zags) {
-                			cost += 10;
-                		}
-                		else if(!hugs && zags) {
-                			cost += 2;
-                		}
-                		else if(hugs && zags) {
-                			cost += 13;
-                		}
-                	}
-                }
-                adj.setCost(cost);
+                adjNode.setCost(cost);
                 
-                openList.add(adj);
+                openList.add(adjNode);
                 
                 if(Node.idCount > Integer.MAX_VALUE)
                 	return null;
+                
             } while(true);
-
         }
+        
         return null;
     }
     
@@ -315,21 +293,6 @@ public class Astar {
     	
     	return path;
     }
-
-    /**
-     * Returns true if this node is adjacent to an obstacle.
-     * @param node
-     * @return 
-     */
-    protected boolean hugsWall(Node node) {
-    	int col = node.getCol();
-    	int row = node.getRow();
-    	
-    	return isObstacle(col-1, row) ||
-    	       isObstacle(col+1, row) ||
-    	       isObstacle(col, row-1) ||
-    	       isObstacle(col, row+1);
-    }
     
     /**
      * Get next adjacent node relative to parent node.
@@ -349,10 +312,12 @@ public class Astar {
             if(adjX < 0 || adjX >= width || adjY < 0 || adjY >= height)
                 continue;
 
-            if(onOpenList(adjX, adjY) || onClosedList(adjX, adjY) || isObstacle(adjX, adjY))
+            if(onOpenList(adjX, adjY) || onClosedList(adjX, adjY) || Helper.isObstacle(tileMap, adjX, adjY))
                 continue;
 
-            return new Node(adjX, adjY, parent);
+            Node node = new Node(adjX, adjY, parent);
+            
+            return node;
         }
 
         return null;
@@ -426,23 +391,9 @@ public class Astar {
      * @return True if node an obstacle.
      */
     protected boolean isObstacle(Node node) {
-      return isObstacle(node.getCol(),node.getRow());
+      return Helper.isObstacle(tileMap, node.getCol(),node.getRow());
     }
 
-    /**
-     * Determines if node at x, y is an obstacle.
-     * @param x X coordinate.
-     * @param y Y coordinate.
-     * @return True if node an obstacle.
-     */
-    protected boolean isObstacle(int x, int y) {
-        if(y < 0 || x < 0 || y >= height || x >= width)
-            return false;
-        
-        char sym = tileMap[y][x];
-
-        return sym == World.WALL_TILE;
-    }
 
     /**
      * Move node to closed list.
@@ -527,6 +478,14 @@ public class Astar {
         return this.closedList;
     }
     
+    public IGeometry getGeometry() {
+        return this.geometry;
+    }
+    
+    public IModel getModel() {
+        return model;
+    }
+    
     /**
      * Load the tile map from a file.
      * Must invoke constructor with file parameter before invoking this method.
@@ -577,7 +536,8 @@ public class Astar {
       
       for(int j=0; j < 1000; j++) {
         
-        BasicGenerator lg = new BasicGenerator(101);
+        BasicGenerator lg = new BasicGenerator();
+        lg.init(101);
         
         lg.layoutSrcDest();
         

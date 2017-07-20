@@ -20,32 +20,14 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package astar.interactive;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JButton;
+package astar.plugijn;
 
 /**
  *
  * @author roncoleman
  */
-public class QuitButton extends JButton implements ActionListener {
-
-    public QuitButton() {
-        super("Quit");
-        
-        init();
-
-    }
-    
-    protected void init() {
-        this.addActionListener(this);        
-    }
-    
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        System.exit(0);
-    }
-    
+public interface ILevelGenerator {
+    abstract void init(int seed);
+    abstract public char[][] generateLevel(int level);
+    abstract public void dump(String path);
 }

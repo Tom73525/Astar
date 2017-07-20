@@ -1,8 +1,28 @@
+/*
+ Copyright (c) Ron Coleman
 
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package astar.interactive;
 
 import astar.Astar;
-import astar.aes.World;
 import astar.util.Node;
 
 /**
@@ -38,20 +58,24 @@ public class SingleStepAstar extends Astar {
             // Put all the adjacent nodes on the open list of possibilities
             do {
                 // Get next adjacent to current node
-                Node adj = getAdjacent(curNode);
+                Node adjNode = getAdjacent(curNode);
 
-                // If there are no more adjacents, we're here
-                if (adj == null) {
+                // If there are no more adjacents, we're done
+                if (adjNode == null) {
                     break;
                 }
 
-                double heuristic = calculateHeuristic(adj, dest);
-                double steps = adj.getSteps();
+                double heuristic = calculateHeuristic(adjNode, dest);
+
+                double steps = adjNode.getSteps();
                 double cost = steps + heuristic;
+                
+                if(model != null)
+                    cost += model.expense(heuristic, curNode, adjNode);
+                
+                adjNode.setCost(cost);
 
-                adj.setCost(cost);
-
-                openList.add(adj);
+                openList.add(adjNode);
 
             } while (true);
             

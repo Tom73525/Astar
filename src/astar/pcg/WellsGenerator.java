@@ -1,5 +1,28 @@
+/*
+ Copyright (c) Ron Coleman
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package astar.pcg;
 
+import astar.plugijn.ILevelGenerator;
 import astar.aes.Tools;
 import astar.aes.World;
 
@@ -8,7 +31,7 @@ import astar.aes.World;
  * @author Martin Wells
  */
 
-public class WellsGenerator extends AbstractLevelGenerator
+public class WellsGenerator implements ILevelGenerator
 {
    private static final int LEFT_DIR = 0;
    private static final int RIGHT_DIR = 1;
@@ -26,18 +49,16 @@ public class WellsGenerator extends AbstractLevelGenerator
    private int roomCount;
    private int playerStartX, playerStartY;
    private int gatewayX, gatewayY;
+   private int seed = 0;
 
    public WellsGenerator()
    {
-       super(0);
+       this.seed = 0;
    }
    
-   /**
-    * Constructs a level with a given random seed.
-    * @param seed Seed
-    */
-   public WellsGenerator(Integer seed) {
-       super(seed);
+   @Override
+   public void init(int seed) {
+       this.seed = seed;
    }
 
    private void clear()
@@ -493,7 +514,7 @@ public class WellsGenerator extends AbstractLevelGenerator
          tileMap[tileY][tileX] = World.WALL_TILE;
    }
 
-   public void dump()
+   public void dump(String path)
    {
       System.out.println("\t          1         2         3         4         5");
       System.out.println("\t012345678901234567890123456789012345678901234567890");

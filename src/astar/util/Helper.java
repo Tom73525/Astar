@@ -20,32 +20,45 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package astar.interactive;
+package astar.util;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JButton;
+import astar.aes.World;
 
 /**
  *
  * @author roncoleman
  */
-public class QuitButton extends JButton implements ActionListener {
+public class Helper {
 
-    public QuitButton() {
-        super("Quit");
+    /**
+     * Determines if node at x, y is an obstacle.
+     * @param tileMap
+     * @param col X coordinate.
+     * @param row Y coordinate.
+     * @return True if node an obstacle.
+     */
+    public static boolean isObstacle(char[][] tileMap, int col, int row) {
+        if(row < 0 || col < 0 || row >= tileMap.length || col >= tileMap[0].length)
+            return false;
         
-        init();
+        char sym = tileMap[row][col];
 
+        return sym == World.WALL_TILE;
     }
     
-    protected void init() {
-        this.addActionListener(this);        
+    /**
+     * Returns true if this node is adjacent to an obstacle.
+     * @param tileMap
+     * @param node
+     * @return 
+     */
+    public static boolean hugsWall(char[][] tileMap, Node node) {
+    	int col = node.getCol();
+    	int row = node.getRow();
+    	
+    	return Helper.isObstacle(tileMap, col-1, row) ||
+    	       Helper.isObstacle(tileMap, col+1, row) ||
+    	       Helper.isObstacle(tileMap, col, row-1) ||
+    	       Helper.isObstacle(tileMap, col, row+1);
     }
-    
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        System.exit(0);
-    }
-    
 }

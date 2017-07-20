@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package astar.geometry;
+package astar.plugijn;
 
 import astar.util.Node;
 
@@ -11,6 +11,8 @@ import astar.util.Node;
  *
  * @author roncoleman
  */
-public interface IGeometry {
-    double distance(Node a, Node b);
+public interface IModel {
+    public void init(char[][] tileMap);
+    public double expense(double heuristic, Node curNode, Node adjNode);
+    public void tweak(Node curNode);
 }

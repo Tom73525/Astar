@@ -1,3 +1,25 @@
+/*
+ Copyright (c) Ron Coleman
+
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package astar.aes;
 
 import astar.pcg.WellsGenerator;
@@ -7,7 +29,6 @@ import astar.aes.fractal.BoxCountingMethod;
 import astar.aes.fractal.fdimage;
 import astar.aes.fractal.fdresult;
 import astar.aes.rs.RsPlot;
-import astar.util.Objective;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -110,21 +131,21 @@ public class  AestheticAstar {
 		}
 		
 		String type = args[0];
-		
-		Objective objective = Objective.NONE;
-		
-		if(type.equals("a"))
-			objective = Objective.STANDARD;
-                
-		else if(type.equals("e"))
-			objective = Objective.STEALTHY;
-                
-		else if(type.equals("s"))
-			objective = Objective.STANDARD;
-		else {
-			System.err.println("bad objective");
-			System.exit(1);
-		}
+//		
+//		Objective objective = Objective.NONE;
+//		
+//		if(type.equals("a"))
+//			objective = Objective.STANDARD;
+//                
+//		else if(type.equals("e"))
+//			objective = Objective.STEALTHY;
+//                
+//		else if(type.equals("s"))
+//			objective = Objective.STANDARD;
+//		else {
+//			System.err.println("bad objective");
+//			System.exit(1);
+//		}
 		
 		int seed = Integer.parseInt(args[1]);
 		Tools.setRandomizer(seed);
@@ -143,16 +164,18 @@ public class  AestheticAstar {
 		
 		Astar astar = new astar.Astar(tileMap,startX,startY,endX,endY);
 
-		astar.util.Node path = astar.find(objective);
+//		astar.util.Node path = astar.find(objective);
+                astar.util.Node path = astar.find();
 		
 		AestheticAstar aes = new AestheticAstar(tileMap);
 		
 		aes.setR2(Double.parseDouble(args[2]));
 		
-		if(objective == Objective.PRETTY) {
-			//aes.straighten(path);
-			aes.straightLong(path);
-		}
+                // TODO: build this into "tweak" of the pretty model
+//		if(objective == Objective.PRETTY) {
+//			//aes.straighten(path);
+//			aes.straightLong(path);
+//		}
 		
 		Node anode = path;
 		
