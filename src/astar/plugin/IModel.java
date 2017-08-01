@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package astar.plugijn;
+package astar.plugin;
 
 import astar.util.Node;
 
@@ -14,5 +14,5 @@ import astar.util.Node;
 public interface IModel {
     public void init(char[][] tileMap);
     public double expense(double heuristic, Node curNode, Node adjNode);
-    public void tweak(Node curNode);
+    public void complete(Node curNode);
 }

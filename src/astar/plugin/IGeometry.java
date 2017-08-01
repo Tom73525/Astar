@@ -20,14 +20,14 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package astar.plugijn;
+package astar.plugin;
+
+import astar.util.Node;
 
 /**
  *
  * @author roncoleman
  */
-public interface ILevelGenerator {
-    abstract void init(int seed);
-    abstract public char[][] generateLevel(int level);
-    abstract public void dump(String path);
+public interface IGeometry {
+    double distance(Node a, Node b);
 }

@@ -22,7 +22,7 @@
  */
 package astar.pcg;
 
-import astar.plugijn.ILevelGenerator;
+import astar.plugin.ILevelGenerator;
 import astar.aes.World;
 import java.util.Random;
 /**

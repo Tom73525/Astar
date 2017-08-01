@@ -22,7 +22,7 @@
  */
 package astar.geometry;
 
-import astar.plugijn.IGeometry;
+import astar.plugin.IGeometry;
 import astar.util.Node;
 
 /**

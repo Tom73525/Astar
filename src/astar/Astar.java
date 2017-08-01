@@ -24,11 +24,11 @@ package astar;
 
 import astar.aes.World;
 import astar.geometry.Euclidean;
-import astar.plugijn.IGeometry;
-import astar.plugijn.ILevelGenerator;
+import astar.plugin.IGeometry;
+import astar.plugin.ILevelGenerator;
 import astar.pcg.BasicGenerator;
 import astar.pcg.WellsGenerator;
-import astar.plugijn.IModel;
+import astar.plugin.IModel;
 import astar.util.Helper;
 import astar.util.Node;
 import java.io.*;

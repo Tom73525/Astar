@@ -22,7 +22,7 @@
  */
 package astar.interactive;
 
-import astar.plugijn.IModel;
+import astar.plugin.IModel;
 import astar.util.Node;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -129,7 +129,7 @@ public final class StepButton extends JButton implements ActionListener {
                             // Sleep here may not be necessary but allows last repaint run
                             sleep(DELAY);
                             
-                            model.tweak(head);
+                            model.complete(head);
                             
                             worldPanel.update(head, openNodes, closedNodes);
                         }
