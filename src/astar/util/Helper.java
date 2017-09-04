@@ -25,16 +25,16 @@ package astar.util;
 import astar.aes.World;
 
 /**
- *
- * @author roncoleman
+ * This class implements helper methods.
+ * @author Ron Coleman
  */
 public class Helper {
 
     /**
-     * Determines if node at x, y is an obstacle.
+     * Determines if node at column, row is an obstacle.
      * @param tileMap
-     * @param col X coordinate.
-     * @param row Y coordinate.
+     * @param col Column coordinate.
+     * @param row Row coordinate.
      * @return True if node an obstacle.
      */
     public static boolean isObstacle(char[][] tileMap, int col, int row) {
@@ -48,9 +48,9 @@ public class Helper {
     
     /**
      * Returns true if this node is adjacent to an obstacle.
-     * @param tileMap
-     * @param node
-     * @return 
+     * @param tileMap Tile map of the world
+     * @param node Node in world
+     * @return True if node is up against wall or obstacle
      */
     public static boolean hugsWall(char[][] tileMap, Node node) {
     	int col = node.getCol();

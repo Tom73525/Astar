@@ -31,6 +31,7 @@ import astar.pcg.WellsGenerator;
 import astar.plugin.IModel;
 import astar.util.Helper;
 import astar.util.Node;
+import static astar.util.Constant.*;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -38,15 +39,10 @@ import java.util.logging.Logger;
 
 /**
  * Main class to implement A* path finding.
- * @author Ron
+ * @author Ron Coleman
  */
 public class Astar {          
     public final double SQRT_2 = Math.sqrt(2);
-    public final static char SYM_DEST = 'D';
-    public final static char SYM_SRC = 'S';
-    public final static char SYM_OBSTACLE = '#';
-    public final static char SYM_BUG = '?';
-    public final static char SYM_FREE = '.';    
 
     public final static boolean PRIORITY_STRAIGHT = false;
     public final static int NO_LIMIT = 10000;
@@ -61,19 +57,18 @@ public class Astar {
     protected char[][] tileMap;
     protected int destX = -1;
     protected int destY = -1;
-    protected int srcX = -1;
-    protected int srcY = -1;
-    protected LinkedList openList = new LinkedList();
-    protected LinkedList closedList = new LinkedList();    
+    protected int startX = -1;
+    protected int startY = -1;
+    protected ArrayList<Node> openList = new ArrayList<>();
+    protected ArrayList<Node> closedList = new ArrayList<>();    
     protected Node dest;
-    protected Node src;
+    protected Node start;
     protected int level = 5;
     protected int seed = 0;
     protected boolean debug;
 
-
-    
     // Offsets relative to current position in map
+    // These help A* look in its neighborhood.
     protected int[][] xyOffsets = {
         {-1, 0},  // W
         {-1, -1}, // NW
@@ -122,8 +117,8 @@ public class Astar {
         this();
         
         this.tileMap = tileMap;
-        this.srcX = srcX;
-        this.srcY = srcY;
+        this.startX = srcX;
+        this.startY = srcY;
         this.destX = destX;
         this.destY = destY;
         this.width = tileMap[0].length;
@@ -200,8 +195,8 @@ public class Astar {
                 
                 switch(tile) {
                     case World.PLAYER_START_TILE:
-                        this.srcX = col;
-                        this.srcY = row;
+                        this.startX = col;
+                        this.startY = row;
                         break;
                         
                     case World.GATEWAY_TILE:
@@ -210,7 +205,7 @@ public class Astar {
                         break;
                 }
                 
-                if(this.srcX < 0 && this.srcY < 0 && this.destX >=0 && this.destY >= 0) {
+                if(this.startX < 0 && this.startY < 0 && this.destX >=0 && this.destY >= 0) {
                     System.err.println("bad tile map");
                     System.exit(1);
                 }
@@ -219,7 +214,7 @@ public class Astar {
     }
     
     public void begin() {
-        dest = src = null;
+        dest = start = null;
     }
     
     /**
@@ -228,9 +223,9 @@ public class Astar {
      */
     public Node find() {
         dest = new Node(destX,destY);
-        src = new Node(srcX,srcY);
+        start = new Node(startX,startY);
 
-        moveToOpen(src);
+        moveToOpen(start);
 
         while(!openList.isEmpty()) {
             Node curNode = getLowestCostNode();
@@ -426,7 +421,7 @@ public class Astar {
     }
     
     /** Find lowest cost node.
-     *  Could be improved if nodes added using insertion sort.
+     *  Note: could be improved if nodes added using insertion sort.
      *  @return Node with lowest cost.
      */
     protected Node getLowestCostNode() {
@@ -458,23 +453,39 @@ public class Astar {
         indOffset = 0;
     }
 
-    public Node getSrc() {
-        return src;
+    /**
+     * Gets the start node.
+     * @return Start node
+     */
+    public Node getStart() {
+        return start;
     }
     
+    /**
+     * Gets the destination node.
+     * @return Destination node
+     */
     public Node getDest() {
         return dest;
     }
     
+    /**
+     * Gets the 2D tile map.
+     * @return map[y][x] or map[row][col]
+     */
     public char[][] getTileMap() {
     	return tileMap;
     }
     
-    public LinkedList getOpen() {
+    /**
+     * Gets the open list of nodes. 
+     * @return Open list
+     */
+    public ArrayList<Node> getOpen() {
         return this.openList;
     }
     
-    public LinkedList getClosed() {
+    public ArrayList<Node> getClosed() {
         return this.closedList;
     }
     
@@ -516,8 +527,8 @@ public class Astar {
                   }
 
                   if(sym == SYM_SRC) {
-                      srcX = j;
-                      srcY = k;
+                      startX = j;
+                      startY = k;
                   }
                 }
             }
@@ -549,34 +560,17 @@ public class Astar {
 
         Node node0 = astar0.find();
         
-        // Get line of sight steps
-        double los = node0.getSteps();
-        
-        //Astar Astar = new Astar(args[0]);
-        //Astar.loadMap();
-        
         Node.idCount = 0;
-        Astar astar1 =
-          new Astar(lg.getMap(),lg.getSrcX(),lg.getSrcY(),lg.getDestX(),lg.getDestY());
         
         lg.layoutBarriers();
 
         double dx = Math.abs(lg.getSrcX()-lg.getDestX());
         double dy = Math.abs(lg.getSrcY()-lg.getDestY());
-
-        double md = dx + dy;       // Manhattan estimate
-        //double md = Math.sqrt(dx*dx + dy*dy);  // Euclidean estimate
-        //double md = Math.max(dx,dy);  // Checkers estimate
-        //double md = dx*dx + dy*dy;  // SSE estimate
-        
-        int limit = (int) ((md-1) * 5 + 8 + 0.5);
         
         long t0 = System.currentTimeMillis();        
-        Node node = astar1.find();
         long t1 = System.currentTimeMillis();
         
         totalt += (t1 - t0);
-
       }
       
       System.out.println("runtime = "+totalt);

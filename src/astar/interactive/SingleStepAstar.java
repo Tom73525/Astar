@@ -36,11 +36,11 @@ public class SingleStepAstar extends Astar {
     } 
     
     public Node find1() {
-        if(src == null && dest == null) {
+        if(start == null && dest == null) {
             dest = new Node(destX, destY);
-            src = new Node(srcX, srcY);
+            start = new Node(startX, startY);
 
-            moveToOpen(src);
+            moveToOpen(start);
         }
 
         while (!openList.isEmpty()) {

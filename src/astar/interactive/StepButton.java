@@ -26,7 +26,7 @@ import astar.plugin.IModel;
 import astar.util.Node;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
@@ -102,9 +102,11 @@ public final class StepButton extends JButton implements ActionListener {
                         return;
                     }
 
+                    // Run one cylce of the game loop
+                    
                     // Update the world panel with the state change
-                    LinkedList<Node> openNodes = astar.getOpen();
-                    LinkedList<Node> closedNodes = astar.getClosed();
+                    ArrayList<Node> openNodes = astar.getOpen();
+                    ArrayList<Node> closedNodes = astar.getClosed();
                     
                     worldPanel.update(head, openNodes, closedNodes);
                     
@@ -158,6 +160,10 @@ public final class StepButton extends JButton implements ActionListener {
                 } while (true);
             }
         }).start();
+    }
+    
+    protected void loop() {
+        
     }
     
     /**

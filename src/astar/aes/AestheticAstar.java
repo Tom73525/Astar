@@ -585,19 +585,19 @@ public class  AestheticAstar {
 		
 		// If wall on left, move right
 		if(isObstacle(x-1,y))
-			anode.setX(x+1);
+			anode.setCol(x+1);
 		
 		// if wall on right, move left
 		else if(isObstacle(x+1,y))
-			anode.setX(x-1);
+			anode.setCol(x-1);
 		
 		// if wall above, move down
 		else if(isObstacle(x,y-1))
-			anode.setY(y+1);
+			anode.setRow(y+1);
 		
 		// if wall below, move up
 		else if(isObstacle(x,y+1))
-			anode.setY(y-1);
+			anode.setRow(y-1);
 		
 		// if wall SE, insert two nodes NW
 
@@ -1374,38 +1374,38 @@ public class  AestheticAstar {
 			//        +
 			//       +.+ anode
 			if(ay == gy && (ay-1) == py && (ax-2) == gx && tileMap[ay][px] != SYM_OBSTACLE) {
-				parent.setY(ay);
+				parent.setRow(ay);
 			}
 			
 			//        +
 			// anode +.+
 			else if(ay == gy && (ay-1) == py && (ax+2) == gx && tileMap[ay][px] != SYM_OBSTACLE) {
-				parent.setY(ay);
+				parent.setRow(ay);
 			}
 			
 			// anode +.+
 			//        +
 			else if(ay == gy && (ay+1) == py && (ax-2) == gx && tileMap[ay][px] != SYM_OBSTACLE) {
-				parent.setY(ay);
+				parent.setRow(ay);
 			}
 			// +.+ anode
 			//  +
 			else if(ay == gy && (ay+1) == py && (ax+2) == gx && tileMap[ay][px] != SYM_OBSTACLE) {
-				parent.setY(ay);
+				parent.setRow(ay);
 			}
 			
 			//  + anode
 			// +.
 			//  +
 			else if(ax == gx && (ax-1) == px && (ay+2) == gy && tileMap[py][ax] != SYM_OBSTACLE) {
-			    parent.setX(ax);
+			    parent.setCol(ax);
 			}
 			
 			//  + anode
 			//  .+
 			//  +
 			else if(ax == gx && (ax+1) == px && (ay+2) == gy && tileMap[py][ax] != SYM_OBSTACLE) {
-			    parent.setX(ax);
+			    parent.setCol(ax);
 			}
 			
 			// add cases for
@@ -1413,14 +1413,14 @@ public class  AestheticAstar {
 			//  .+
 			//  + anode
 			else if(ax == gx && (ax+1) == px && (ay-2) == gy && tileMap[py][ax] != SYM_OBSTACLE) {
-			    parent.setX(ax);
+			    parent.setCol(ax);
 			}
 			
 			//  +
 			// +.
 			//  + anode
 			else if(ax == gx && (ax-1) == px && (ay-2) == gy && tileMap[py][ax] != SYM_OBSTACLE) {
-			    parent.setX(ax);
+			    parent.setCol(ax);
 			}
 			
 			anode = parent;

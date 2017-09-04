@@ -30,7 +30,7 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import javax.swing.JPanel;
 
 /**
@@ -64,8 +64,8 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
     private Node head;
     private Node start;
     private Node dest;
-    private LinkedList<Node> open = new LinkedList<>();
-    private LinkedList<Node> closed = new LinkedList<>();
+    private ArrayList<Node> open = new ArrayList<>();
+    private ArrayList<Node> closed = new ArrayList<>();
     
     public WorldPanel(char[][] map) {
         this.map = map;
@@ -93,7 +93,7 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
         render();
     }
     
-    public void update(Node head, LinkedList<Node> open, LinkedList<Node> closed) {
+    public void update(Node head, ArrayList<Node> open, ArrayList<Node> closed) {
         this.head = head;
         
         this.open = open;
