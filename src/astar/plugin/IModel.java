@@ -30,6 +30,6 @@ import astar.util.Node;
  */
 public interface IModel {
     public void init(char[][] tileMap);
-    public double rebound(double heuristic, Node curNode, Node adjNode);
+    public double recount(double heuristic, Node curNode, Node adjNode);
     public void complete(Node curNode);
 }

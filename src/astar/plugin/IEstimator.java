@@ -20,24 +20,15 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package astar.geometry;
+package astar.plugin;
 
-import astar.plugin.IGeometry;
 import astar.util.Node;
 
 /**
- *
- * @author roncoleman
+ * This interface define the heuristic distance from the current node a to
+ * goal b.
+ * @author Ron Coleman
  */
-public class Euclidean implements IGeometry {
-    @Override
-    public double distance(Node a, Node b) {
-        double dx = a.getCol() - b.getCol();
-        
-        double dy = a.getRow() - b.getRow();
-        
-        double dist = Math.sqrt(dx*dx + dy*dy);
-        
-        return dist;
-    }
+public interface IEstimator {
+    double distance(Node curNode, Node goal);
 }

@@ -23,8 +23,7 @@
 package astar;
 
 import astar.aes.World;
-import astar.geometry.Euclidean;
-import astar.plugin.IGeometry;
+import astar.heuristic.Euclidean;
 import astar.plugin.ILevelGenerator;
 import astar.pcg.BasicGenerator;
 import astar.pcg.WellsGenerator;
@@ -32,11 +31,12 @@ import astar.plugin.IModel;
 import astar.util.Helper;
 import astar.util.Node;
 import static astar.util.Constant.*;
-import astar.util.StandardModel;
+import astar.model.Standard;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import astar.plugin.IEstimator;
 
 /**
  * Main class to implement A* path finding.
@@ -48,9 +48,9 @@ public class Astar {
     public final static boolean PRIORITY_STRAIGHT = false;
     public final static int NO_LIMIT = 10000;
     
-    protected IGeometry geometry = new Euclidean(); 
+    protected IEstimator estimator = new Euclidean(); 
     protected ILevelGenerator levelGenerator = new WellsGenerator();
-    protected IModel model = new StandardModel();
+    protected IModel model = new Standard();
     
     protected BufferedReader reader;
     protected int width;
@@ -145,11 +145,11 @@ public class Astar {
             level = Integer.parseInt(value);
         }
         
-        String className = System.getProperty("astar.geometry");
+        String className = System.getProperty("astar.heuristic");
         if(className != null) {
             try {
                 Class<?> cl = Class.forName(className);
-                 geometry = (IGeometry) cl.newInstance();
+                 estimator = (IEstimator) cl.newInstance();
                  
             } catch (ClassNotFoundException ex) {
             } catch (InstantiationException | IllegalAccessException ex) {
@@ -270,7 +270,7 @@ public class Astar {
                 double cost = steps + heuristic;
                 
                 if(model != null)
-                    cost += model.rebound(heuristic, curNode, adjNode);
+                    cost += model.recount(heuristic, curNode, adjNode);
 
                 adjNode.setCost(cost);
                 
@@ -433,7 +433,7 @@ public class Astar {
      * @return Distance.
      */
     protected double calculateHeuristic(Node adj, Node goal) {
-        double dist = geometry.distance(adj, goal);
+        double dist = estimator.distance(adj, goal);
         
         return dist;
     }
@@ -513,10 +513,10 @@ public class Astar {
     
     /**
      * Gets the heuristic estimator or "geometry".
-     * @return Geometry
+     * @return Estimator
      */
-    public IGeometry getGeometry() {
-        return this.geometry;
+    public IEstimator getEstimator() {
+        return this.estimator;
     }
     
     /**

@@ -138,8 +138,9 @@ public final class StepButton extends JButton implements ActionListener {
                         
                         int distance = Math.round((float)head.getSteps());
                         
-                        String msg = "Geometry: " +
-                                astar.getGeometry().getClass().getSimpleName();
+                        String msg = "Model: " + astar.getModel().getClass().getSimpleName();
+                                
+                        msg += "\nHeuristic: " + astar.getEstimator().getClass().getSimpleName();
                         
                         msg += "\nTries: " + tries; 
                         

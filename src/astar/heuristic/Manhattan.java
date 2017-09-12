@@ -20,23 +20,23 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package astar.geometry;
+package astar.heuristic;
 
-import astar.plugin.IGeometry;
 import astar.util.Node;
+import astar.plugin.IEstimator;
 
 /**
  *
  * @author roncoleman
  */
-public class Sse implements IGeometry {
+public class Manhattan implements IEstimator {
     @Override
     public double distance(Node a, Node b) {
         double dx = a.getCol() - b.getCol();
         
         double dy = a.getRow() - b.getRow();
         
-        double dist = dx*dx + dy*dy;
+        double dist = Math.abs(dx) + Math.abs(dy);
         
         return dist;
     }    

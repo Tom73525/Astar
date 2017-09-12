@@ -27,22 +27,38 @@ package astar.util;
  */
 public class Node {
 
+    /** Unique id counter for all nodes */
     public static int idCount;
     public static double SQRT_2 = Math.sqrt(2);
     
     protected int col;
     protected int row;
+    
+    /** This node's parent */
     protected Node parent;
+    
+    /** This node's child -- NOT GENERALLY USED since a node typically
+     * will have many children.
+     */
     protected Node child;
+    
+    /** The f(n) cost */
     protected double cost = 0;
+    
+    /** Steps from the start */
     protected double steps = 0;
+    
+    /** This node's unique id */
     protected int id;
+    
+    /** This is the propensity to continue without zags */
+    protected int inertia = 0;
 
     /**
      * Constructor.
      *
-     * @param col X coordinate.
-     * @param row Y coordinate.
+     * @param col Column coordinate.
+     * @param row Row coordinate.
      */
     public Node(int col, int row) {
         this.col = col;
@@ -53,7 +69,6 @@ public class Node {
 
     /**
      * Constructor.
-     *
      * @param col Column coordinate.
      * @param row Row coordinate.
      * @param parent Parent node of node.
@@ -81,7 +96,7 @@ public class Node {
     }
 
     /**
-     * Copy constructor
+     * Copy constructor -- sort of
      *
      * @param node Node to copy.
      */
@@ -257,6 +272,22 @@ public class Node {
      */
     public int getId() {
         return this.id;
+    }
+    
+    /**
+     * Gets the nodes inertia.
+     * @return Inertia
+     */
+    public int getInertia() {
+        return inertia;
+    }
+    
+    /**
+     * Sets the inertia.
+     * @param inertia Inertia
+     */
+    public void setInertia(int inertia) {
+        this.inertia = inertia;
     }
 
     @Override

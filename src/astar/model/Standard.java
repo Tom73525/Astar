@@ -20,15 +20,16 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package astar.util;
+package astar.model;
 
 import astar.plugin.IModel;
+import astar.util.Node;
 
 /**
  *
  * @author roncoleman
  */
-public class StandardModel implements IModel {
+public class Standard implements IModel {
     protected char[][] tileMap = null;
 
     /**
@@ -52,7 +53,7 @@ public class StandardModel implements IModel {
      * @return Updated estimated heuristic estimate.
      */
     @Override
-    public double rebound(double heuristic, Node curNode, Node adjNode) {
+    public double recount(double heuristic, Node curNode, Node adjNode) {
         return heuristic;
     }
 

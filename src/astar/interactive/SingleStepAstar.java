@@ -71,7 +71,7 @@ public class SingleStepAstar extends Astar {
                 double cost = steps + heuristic;
                 
                 if(model != null)
-                    cost += model.rebound(heuristic, curNode, adjNode);
+                    cost += model.recount(heuristic, curNode, adjNode);
                 
                 adjNode.setCost(cost);
 
