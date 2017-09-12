@@ -121,7 +121,7 @@ public final class StepButton extends JButton implements ActionListener {
                     }
                             
                     // If the head is the destination, then we're done                    
-                    Node dest = astar.getDest();
+                    Node dest = astar.getGoal();
                     
                     if(head.equals(dest)) {
                         // If there's a model, tweak it and run update one last time

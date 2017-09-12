@@ -32,6 +32,7 @@ import astar.plugin.IModel;
 import astar.util.Helper;
 import astar.util.Node;
 import static astar.util.Constant.*;
+import astar.util.StandardModel;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -49,40 +50,43 @@ public class Astar {
     
     protected IGeometry geometry = new Euclidean(); 
     protected ILevelGenerator levelGenerator = new WellsGenerator();
-    protected IModel model = null;
+    protected IModel model = new StandardModel();
     
     protected BufferedReader reader;
     protected int width;
     protected int height;
     protected char[][] tileMap;
-    protected int destX = -1;
-    protected int destY = -1;
-    protected int startX = -1;
-    protected int startY = -1;
+    protected int goalCol = -1;
+    protected int goalRow = -1;
+    protected int startCol = -1;
+    protected int startRow = -1;
     protected ArrayList<Node> openList = new ArrayList<>();
     protected ArrayList<Node> closedList = new ArrayList<>();    
-    protected Node dest;
+    protected Node goal;
     protected Node start;
     protected int level = 5;
     protected int seed = 0;
     protected boolean debug;
 
-    // Offsets relative to current position in map
-    // These help A* look in its neighborhood.
-    protected int[][] xyOffsets = {
-        {-1, 0},  // W
-        {-1, -1}, // NW
-        {0, -1},  // N
-        {1, -1},  // NE
-        {1, 0},   // E
-        {1, 1},   // SE
-        {0, 1},   // S
-        {-1, 1}   // SW
+    // Col, row offsets relative to current position in map.
+    // These allow A* look in its neighborhood.
+    protected int[][] neighborOffsets = {
+        { -1,  0 },   // W  neighbor
+        { -1, -1 },   // NW "
+        {  0, -1 },   // N  "
+        {  1, -1 },   // NE "
+        {  1,  0 },   // E  "
+        {  1,  1 },   // SE "
+        {  0,  1 },   // S  "
+        { -1,  1 }    // SW "
     };
 
     // Next offset index
     protected int indOffset;
     
+    /**
+     * Constructor
+     */
     public Astar() {
         initConfig();
         
@@ -104,23 +108,22 @@ public class Astar {
         }
     }
 
-    
     /**
      * Constructor.
      * @param tileMap Tile map.
-     * @param srcX Source x in world
-     * @param srcY Source y in world
-     * @param destX Destination x in world
-     * @param destY Destination y in world
+     * @param srcCol Source x in world
+     * @param srcRow Source y in world
+     * @param goalCol Destination x in world
+     * @param goalRow Destination y in world
      */
-    public Astar(char[][] tileMap, int srcX, int srcY, int destX, int destY) {
+    public Astar(char[][] tileMap, int srcCol, int srcRow, int goalCol, int goalRow) {
         this();
         
         this.tileMap = tileMap;
-        this.startX = srcX;
-        this.startY = srcY;
-        this.destX = destX;
-        this.destY = destY;
+        this.startCol = srcCol;
+        this.startRow = srcRow;
+        this.goalCol = goalCol;
+        this.goalRow = goalRow;
         this.width = tileMap[0].length;
         this.height = tileMap.length;
     }
@@ -167,7 +170,11 @@ public class Astar {
         }
     }
     
+    /**
+     * Initializes the level.
+     */
     protected final void initLevel() {
+        // Get a level generator
         String className = System.getProperty("astar.lg");
         
         if (className == null)
@@ -185,52 +192,63 @@ public class Astar {
             System.exit(1);
         }
         
+        // Generate the level
         this.tileMap = levelGenerator.generateLevel(level);
+        
         this.width = tileMap[0].length;
+        
         this.height = tileMap.length;
         
+        // Identify the start and destination
         for(int row=0; row < tileMap.length; row++) {
             for(int col=0; col < tileMap[0].length; col++) {
                 char tile = tileMap[row][col];
                 
                 switch(tile) {
                     case World.PLAYER_START_TILE:
-                        this.startX = col;
-                        this.startY = row;
+                        this.startCol = col;
+                        this.startRow = row;
                         break;
                         
                     case World.GATEWAY_TILE:
-                        this.destX = col;
-                        this.destY = row;
+                        this.goalCol = col;
+                        this.goalRow = row;
                         break;
                 }
                 
-                if(this.startX < 0 && this.startY < 0 && this.destX >=0 && this.destY >= 0) {
+                if(this.startCol < 0 && this.startRow < 0 && this.goalCol >=0 && this.goalRow >= 0) {
                     System.err.println("bad tile map");
                     System.exit(1);
                 }
             }
-        }        
-    }
-    
-    public void begin() {
-        dest = start = null;
+        } 
+        
+        // Initialize the model, if there is one
+        if(model != null)
+            model.init(tileMap);
     }
     
     /**
-     * Find path find source to destination.
+     * Begins the search.
+     */
+    public void begin() {
+        goal = start = null;
+    }
+    
+    /**
+     * Find path find source to goal.
      * @return Destination node if path found, null if no path found.
      */
     public Node find() {
-        dest = new Node(destX,destY);
-        start = new Node(startX,startY);
+        goal = new Node(goalCol, goalRow);
+        start = new Node(startCol, startRow);
 
         moveToOpen(start);
 
         while(!openList.isEmpty()) {
             Node curNode = getLowestCostNode();
 
-            if(curNode.equals(dest))
+            if(curNode.equals(goal))
                 return relink(curNode);
 
             moveToClosed(curNode);
@@ -245,14 +263,14 @@ public class Astar {
                 if(adjNode == null)
                     break;
 
-                double heuristic = calculateHeuristic(adjNode,dest);
+                double heuristic = calculateHeuristic(adjNode,goal);
                 
                 double steps = adjNode.getSteps();
                 
                 double cost = steps + heuristic;
                 
                 if(model != null)
-                    cost += model.expense(heuristic, curNode, adjNode);
+                    cost += model.rebound(heuristic, curNode, adjNode);
 
                 adjNode.setCost(cost);
                 
@@ -298,9 +316,9 @@ public class Astar {
         int x = parent.getCol();
         int y = parent.getRow();
 
-        while(indOffset < xyOffsets.length) {
-            int adjX = x + xyOffsets[indOffset][0];
-            int adjY = y + xyOffsets[indOffset][1];
+        while(indOffset < neighborOffsets.length) {
+            int adjX = x + neighborOffsets[indOffset][0];
+            int adjY = y + neighborOffsets[indOffset][1];
 
             indOffset++;
 
@@ -411,11 +429,11 @@ public class Astar {
     /**
      * Calculate heuristic part of cost using default geometry.
      * @param adj Adjacent node.
-     * @param dest Destination node.
+     * @param goal Destination node.
      * @return Distance.
      */
-    protected double calculateHeuristic(Node adj, Node dest) {
-        double dist = geometry.distance(adj, dest);
+    protected double calculateHeuristic(Node adj, Node goal) {
+        double dist = geometry.distance(adj, goal);
         
         return dist;
     }
@@ -462,11 +480,11 @@ public class Astar {
     }
     
     /**
-     * Gets the destination node.
-     * @return Destination node
+     * Gets the goal node.
+     * @return Goal node
      */
-    public Node getDest() {
-        return dest;
+    public Node getGoal() {
+        return goal;
     }
     
     /**
@@ -485,14 +503,26 @@ public class Astar {
         return this.openList;
     }
     
+    /**
+     * Gets the closed list.
+     * @return Close list
+     */
     public ArrayList<Node> getClosed() {
         return this.closedList;
     }
     
+    /**
+     * Gets the heuristic estimator or "geometry".
+     * @return Geometry
+     */
     public IGeometry getGeometry() {
         return this.geometry;
     }
     
+    /**
+     * Gets the model.
+     * @return Model
+     */
     public IModel getModel() {
         return model;
     }
@@ -522,13 +552,13 @@ public class Astar {
                   tileMap[k][j] = sym;
 
                   if(sym == SYM_DEST) {
-                      destX = j;
-                      destY = k;
+                      goalCol = j;
+                      goalRow = k;
                   }
 
                   if(sym == SYM_SRC) {
-                      startX = j;
-                      startY = k;
+                      startCol = j;
+                      startRow = k;
                   }
                 }
             }
@@ -558,14 +588,14 @@ public class Astar {
         Astar astar0 =
             new Astar(lg.getMap(),lg.getSrcX(),lg.getSrcY(),lg.getDestX(),lg.getDestY());
 
-        Node node0 = astar0.find();
+//        Node node0 = astar0.find();
         
         Node.idCount = 0;
         
         lg.layoutBarriers();
 
-        double dx = Math.abs(lg.getSrcX()-lg.getDestX());
-        double dy = Math.abs(lg.getSrcY()-lg.getDestY());
+//        double dx = Math.abs(lg.getSrcX()-lg.getDestX());
+//        double dy = Math.abs(lg.getSrcY()-lg.getDestY());
         
         long t0 = System.currentTimeMillis();        
         long t1 = System.currentTimeMillis();

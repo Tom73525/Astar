@@ -52,7 +52,7 @@ public class Helper {
      * @param node Node in world
      * @return True if node is up against wall or obstacle
      */
-    public static boolean hugsWall(char[][] tileMap, Node node) {
+    public static boolean tracksWall(char[][] tileMap, Node node) {
     	int col = node.getCol();
     	int row = node.getRow();
     	

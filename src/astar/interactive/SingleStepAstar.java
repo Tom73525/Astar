@@ -36,9 +36,9 @@ public class SingleStepAstar extends Astar {
     } 
     
     public Node find1() {
-        if(start == null && dest == null) {
-            dest = new Node(destX, destY);
-            start = new Node(startX, startY);
+        if(start == null && goal == null) {
+            goal = new Node(goalCol, goalRow);
+            start = new Node(startCol, startRow);
 
             moveToOpen(start);
         }
@@ -46,7 +46,7 @@ public class SingleStepAstar extends Astar {
         while (!openList.isEmpty()) {
             Node curNode = getLowestCostNode();
 
-            if (curNode.equals(dest)) {
+            if (curNode.equals(goal)) {
                 return relink(curNode);
             }
 
@@ -65,13 +65,13 @@ public class SingleStepAstar extends Astar {
                     break;
                 }
 
-                double heuristic = calculateHeuristic(adjNode, dest);
+                double heuristic = calculateHeuristic(adjNode, goal);
 
                 double steps = adjNode.getSteps();
                 double cost = steps + heuristic;
                 
                 if(model != null)
-                    cost += model.expense(heuristic, curNode, adjNode);
+                    cost += model.rebound(heuristic, curNode, adjNode);
                 
                 adjNode.setCost(cost);
 
