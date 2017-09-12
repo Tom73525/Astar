@@ -22,15 +22,15 @@
  */
 package astar.aes;
 
-import astar.pcg.WellsGenerator;
+import astar.pcg.Wells;
 import astar.util.Node;
 
 public class Flower {
-	private WellsGenerator lg;
+	private Wells lg;
 	private Node fullPath;
 	private Node basicPath;
 	
-	public Flower(WellsGenerator lg) {
+	public Flower(Wells lg) {
 		this.lg = lg;
 	}
 	

@@ -25,8 +25,8 @@ package astar;
 import astar.aes.World;
 import astar.heuristic.Euclidean;
 import astar.plugin.ILevelGenerator;
-import astar.pcg.BasicGenerator;
-import astar.pcg.WellsGenerator;
+import astar.pcg.Basic;
+import astar.pcg.Wells;
 import astar.plugin.IModel;
 import astar.util.Helper;
 import astar.util.Node;
@@ -49,7 +49,7 @@ public class Astar {
     public final static int NO_LIMIT = 10000;
     
     protected IEstimator estimator = new Euclidean(); 
-    protected ILevelGenerator levelGenerator = new WellsGenerator();
+    protected ILevelGenerator levelGenerator = new Wells();
     protected IModel model = new Standard();
     
     protected BufferedReader reader;
@@ -577,7 +577,7 @@ public class Astar {
       
       for(int j=0; j < 1000; j++) {
         
-        BasicGenerator lg = new BasicGenerator();
+        Basic lg = new Basic();
         lg.init(101);
         
         lg.layoutSrcDest();

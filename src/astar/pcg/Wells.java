@@ -31,7 +31,7 @@ import astar.aes.World;
  * @author Martin Wells
  */
 
-public class WellsGenerator implements ILevelGenerator
+public class Wells implements ILevelGenerator
 {
    private static final int LEFT_DIR = 0;
    private static final int RIGHT_DIR = 1;
@@ -51,7 +51,7 @@ public class WellsGenerator implements ILevelGenerator
    private int gatewayX, gatewayY;
    private int seed = 0;
 
-   public WellsGenerator()
+   public Wells()
    {
        this.seed = 0;
    }

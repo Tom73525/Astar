@@ -23,8 +23,8 @@
 package astar.plugin;
 
 /**
- *
- * @author roncoleman
+ * This interface defines how a level generator behaves.
+ * @author Ron Coleman
  */
 public interface ILevelGenerator {
     abstract void init(int seed);

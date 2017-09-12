@@ -22,7 +22,7 @@
  */
 package astar.aes;
 
-import astar.pcg.WellsGenerator;
+import astar.pcg.Wells;
 import astar.util.Node;
 import astar.Astar;
 import astar.aes.fractal.BoxCountingMethod;
@@ -153,7 +153,7 @@ public class  AestheticAstar {
 		boolean imageFlag = true;
 		
 		// Generate a 50x50 world
-		WellsGenerator lg = new WellsGenerator();
+		Wells lg = new Wells();
 		
 		char[][] tileMap = lg.generateLevel(10);
 

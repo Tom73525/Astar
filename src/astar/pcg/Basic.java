@@ -29,7 +29,7 @@ import java.util.Random;
  *
  * @author RonColeman
  */
-public class BasicGenerator implements ILevelGenerator {
+public class Basic implements ILevelGenerator {
   public final static int BUFZONE = 4;
   //public final static int BARRIER_FACTOR = 5;
   public final static int BARRIER_FACTOR = 2;
@@ -46,7 +46,7 @@ public class BasicGenerator implements ILevelGenerator {
   /** Creates a new instance of LevelGenerator
      * @param seed
    */
-  public BasicGenerator() {
+  public Basic() {
   }
   
   @Override
