@@ -34,6 +34,7 @@ public class Standard implements IModel {
 
     /**
      * Initializes the model with the map.
+     * It is invoked once before the start of pathfinding.
      * @param tileMap Map with tileMap[row][col].
      */
     @Override
@@ -44,13 +45,17 @@ public class Standard implements IModel {
     /**
      * Adjusts the heuristic estimate based on where the algorithm is.
      * This method is invoked for each neighboring node of curNode in free-space.
+     * For level 5 worlds, it may be invoked several hundred times during pathfinding.
      * Typically this method uses the tile map to determine if the immediate,
-     * local path (i.e., curNode and adjNode and possibly curNode.parent) is
-     * changing in its 1st derivative.
+     * local path (i.e., curNode and adjNode and curNode.parent) is
+     * changing in its 2nd derivative. Note the adjNode is the node we're adding
+     * to open-list and it is this node's heuristic we shape, if necessary.
+     * curNode is current lowest cost node and already on the open-list, soon to
+     * be transferred on the closed-list.
      * @param heuristic Heuristic estimate
      * @param curNode Current node
-     * @param adjNode Adjacent neighboring node in free-space
-     * @return Updated estimated heuristic estimate.
+     * @param adjNode Adjacent neighboring node in free-space. 
+     * @return Shaped heuristic estimate.
      */
     @Override
     public double shape(double heuristic, Node curNode, Node adjNode) {
@@ -59,14 +64,13 @@ public class Standard implements IModel {
 
     /**
      * Completes the model.
-     * This method is invoked only when we reach the destination.
+     * This method is invoked exactly once when we reach the goal.
      * The curNode uses backward pointing links (i.e., parent attributes) to
      * find the start node which will have a null parent. Thus, this method has
      * access to the entire path and can "tweak" it as needed.
-     * @param curNode 
+     * @param curNode Current (or goal node)
      */
     @Override
     public void complete(Node curNode) {
     }
-    
 }
