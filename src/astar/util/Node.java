@@ -28,7 +28,7 @@ package astar.util;
 public class Node {
 
     /** Unique id counter for all nodes */
-    public static int idCount;
+    public static int idCount = 0;
     public static double SQRT_2 = Math.sqrt(2);
     
     protected int col;
@@ -49,7 +49,7 @@ public class Node {
     protected double steps = 0;
     
     /** This node's unique id */
-    protected int id;
+    protected int id = idCount++;
     
     /** This is the propensity to continue without zags */
     protected int inertia = 0;
@@ -64,7 +64,7 @@ public class Node {
         this.col = col;
         this.row = row;
         this.cost = Long.MAX_VALUE;
-        this.id = idCount++;
+//        this.id = idCount++;
     }
 
     /**

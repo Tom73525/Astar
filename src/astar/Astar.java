@@ -131,6 +131,9 @@ public class Astar {
      * Initializes the configuration.
      */
     protected final void initConfig() {
+        // Clear the node count
+        Node.idCount = 0;
+        
         String value = System.getProperty("astar.debug");
         if(value != null && value.equals("true"))
             debug = true;
@@ -178,7 +181,7 @@ public class Astar {
         String className = System.getProperty("astar.lg");
         
         if (className == null)
-            className = "astar.pcg.WellsGenerator";
+            className = "astar.pcg.Wells";
 
         try {
             Class<?> clzz = Class.forName(className);
@@ -215,13 +218,14 @@ public class Astar {
                         this.goalRow = row;
                         break;
                 }
-                
-                if(this.startCol < 0 && this.startRow < 0 && this.goalCol >=0 && this.goalRow >= 0) {
-                    System.err.println("bad tile map");
-                    System.exit(1);
-                }
+
             }
         } 
+
+        if (this.startCol < 0 && this.startRow < 0 && this.goalCol >= 0 && this.goalRow >= 0) {
+            System.err.println("bad tile map");
+            System.exit(1);
+        }  
         
         // Initialize the model, if there is one
         if(model != null)
@@ -270,7 +274,7 @@ public class Astar {
                 double cost = steps + heuristic;
                 
                 if(model != null)
-                    cost += model.recount(heuristic, curNode, adjNode);
+                    cost += model.shape(heuristic, curNode, adjNode);
 
                 adjNode.setCost(cost);
                 

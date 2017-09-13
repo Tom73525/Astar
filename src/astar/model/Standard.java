@@ -26,8 +26,8 @@ import astar.plugin.IModel;
 import astar.util.Node;
 
 /**
- *
- * @author roncoleman
+ * This class implements the standard model.
+ * @author Ron Coleman
  */
 public class Standard implements IModel {
     protected char[][] tileMap = null;
@@ -53,7 +53,7 @@ public class Standard implements IModel {
      * @return Updated estimated heuristic estimate.
      */
     @Override
-    public double recount(double heuristic, Node curNode, Node adjNode) {
+    public double shape(double heuristic, Node curNode, Node adjNode) {
         return heuristic;
     }
 
