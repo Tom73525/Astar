@@ -227,9 +227,8 @@ public class Astar {
             System.exit(1);
         }  
         
-        // Initialize the model, if there is one
-        if(model != null)
-            model.init(tileMap);
+        // Initialize the model
+        model.init(tileMap);
     }
     
     /**
@@ -268,13 +267,10 @@ public class Astar {
                     break;
 
                 double heuristic = calculateHeuristic(adjNode,goal);
+                                
+                double cost = adjNode.getSteps();
                 
-                double steps = adjNode.getSteps();
-                
-                double cost = steps + heuristic;
-                
-                if(model != null)
-                    cost += model.shape(heuristic, curNode, adjNode);
+                cost += model.shape(heuristic, curNode, adjNode);                   
 
                 adjNode.setCost(cost);
                 

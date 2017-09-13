@@ -67,11 +67,9 @@ public class SingleStepAstar extends Astar {
 
                 double heuristic = calculateHeuristic(adjNode, goal);
 
-                double steps = adjNode.getSteps();
-                double cost = steps + heuristic;
+                double cost = adjNode.getSteps();
                 
-                if(model != null)
-                    cost += model.shape(heuristic, curNode, adjNode);
+                cost += model.shape(heuristic, curNode, adjNode);
                 
                 adjNode.setCost(cost);
 
