@@ -34,8 +34,8 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 /**
- *
- * @author roncoleman
+ * This class implements the main world panel which renders the pathfinding state.
+ * @author Ron Coleman
  */
 public class WorldPanel extends JPanel implements MouseListener, MouseMotionListener {
     public final int CELL_SIZE = 12;
@@ -48,8 +48,7 @@ public class WorldPanel extends JPanel implements MouseListener, MouseMotionList
     
     private final int rowCount;
     private final int colCount;
-    
-    
+   
     // Base x,y give the upper left corner of the world
     private int baseX = 0;
     private int baseY = 0;

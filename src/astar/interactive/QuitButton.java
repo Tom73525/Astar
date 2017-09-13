@@ -27,8 +27,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 
 /**
- *
- * @author roncoleman
+ * This class implements the quite button.
+ * @author Ron Coleman
  */
 public class QuitButton extends JButton implements ActionListener {
 
@@ -39,10 +39,17 @@ public class QuitButton extends JButton implements ActionListener {
 
     }
     
+    /**
+     * Initializes the button.
+     */
     protected void init() {
         this.addActionListener(this);        
     }
     
+    /**
+     * Handles when the button is clicked.
+     * @param e Event
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         System.exit(0);
