@@ -142,6 +142,7 @@ public final class StepButton extends JButton implements ActionListener {
                             model.complete(head);
                             
                             worldPanel.update(head, openNodes, closedNodes);
+                            worldPanel.render();
                         }
                         
                         int distance = Math.round((float)head.getSteps());
