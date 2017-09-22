@@ -100,8 +100,11 @@ public class AstarFrame extends JFrame {
 
         // Configure the control panel
         JPanel controlPanel = new JPanel();
+        
 
         controlPanel.setLayout(new BorderLayout());
+        
+        
 
         controlPanel.add(BorderLayout.EAST, new QuitButton());
 
@@ -116,7 +119,11 @@ public class AstarFrame extends JFrame {
         stepPanel.add(BorderLayout.CENTER, runEndCheckBox);
 
         // Add manual single-step button
-        stepPanel.add(BorderLayout.WEST, new StepButton(this));
+        StepButton stepButton = new StepButton(this);
+        
+        stepPanel.add(BorderLayout.WEST, stepButton);
+        
+        controlPanel.add(BorderLayout.CENTER, new ExportButton(worldPanel,stepButton));
 
         controlPanel.add(BorderLayout.WEST, stepPanel);
 

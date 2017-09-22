@@ -39,15 +39,23 @@ public final class StepButton extends JButton implements ActionListener {
     public final static int DELAY = 300;
     
     private final WorldPanel worldPanel;
-    private final SingleStepAstar astar;
+    protected final SingleStepAstar astar;
     private final JCheckBox runEndCheckBox;
-    private int tries = 0;
-    private final AstarFrame frame;
-    
+    protected static int tries = 0;
+    protected final AstarFrame frame;
     /**
      * Constructor.
      * @param frame Parent frame
      */
+    
+    protected static String mod;
+    protected static String heuristic;
+    protected static int tries1;
+    protected static int nodes;
+    protected static int dist;
+    
+    
+    
     public StepButton(AstarFrame frame) {
         super("Step");
         
@@ -138,15 +146,25 @@ public final class StepButton extends JButton implements ActionListener {
                         
                         int distance = Math.round((float)head.getSteps());
                         
-                        String msg = "Model: " + astar.getModel().getClass().getSimpleName();
+                        mod=astar.getModel().getClass().getSimpleName();
+                        
+                        heuristic=astar.getEstimator().getClass().getSimpleName();
+                        
+                        tries1=tries;
+                        
+                        dist=distance;
+                        
+                        nodes= Node.idCount;
+                        
+                        String msg = "Model: " + mod;
                                 
-                        msg += "\nHeuristic: " + astar.getEstimator().getClass().getSimpleName();
+                        msg += "\nHeuristic: " + heuristic;
                         
-                        msg += "\nTries: " + tries; 
+                        msg += "\nTries: " +  tries1;
                         
-                        msg += "\nDistance: " + distance;
+                        msg += "\nDistance: " + dist;
                         
-                        msg += "\nNodes: " + Node.idCount;
+                        msg += "\nNodes: " +  Node.idCount;
                         
                         JOptionPane.showMessageDialog(frame, msg);
                         
