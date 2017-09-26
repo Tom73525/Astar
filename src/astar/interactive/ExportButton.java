@@ -52,7 +52,9 @@ public class ExportButton extends JButton implements ActionListener{
         stepButton = button;
     }
     
-    
+    /*
+        Takes a screensot of the WorldPanel context and saves it to an image file.
+    */
     void takeSnapShot(WorldPanel panel, File path ){
     
         this.path = path;
@@ -69,6 +71,9 @@ public class ExportButton extends JButton implements ActionListener{
         }
     }
     
+    /*
+        Gets the final metric values of the path and saves it to a CSV file.
+    */
     void getSummary(StepButton button, File path)
     {
         this.path=path;
@@ -126,6 +131,9 @@ public class ExportButton extends JButton implements ActionListener{
        
         
     }
+    /*
+        Implementation for File Chooser
+    */
     class ExportPanel extends JPanel implements ActionListener{
 
         JButton directoryButton; 
