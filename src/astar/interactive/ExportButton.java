@@ -106,11 +106,11 @@ public class ExportButton extends JButton implements ActionListener{
             g.setColor(Color.red);
             Font font = new Font("Monotype Corsiva",20,20);
             g.setFont(font);
-            g.drawString("Model : "+model, 70, 500);
-            g.drawString("Heuristic : "+heuristic, 70, 530);
-            g.drawString("Tries : "+tries, 70, 560);
-            g.drawString("Nodes : "+nodes, 70, 590);
-            g.drawString("Distance : "+distance, 70, 620);
+            g.drawString("Model : "+model, 70, 530);
+            g.drawString("Heuristic : "+heuristic, 70, 560);
+            g.drawString("Tries : "+tries, 70, 590);
+            g.drawString("Nodes : "+nodes, 70, 620);
+            g.drawString("Distance : "+distance, 70, 650);
             
             //Save as PNG file under the same name
             ImageIO.write(img, "png", newFile);
